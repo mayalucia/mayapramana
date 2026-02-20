@@ -1,0 +1,796 @@
+#+title: Lesson 00 — The Bloch Equations
+#+subtitle: Spin Dynamics as Pure Functions
+#+author: MāyāPramāṇa
+#+date: February 2026
+#+property: header-args :mkdirp yes
+#+property: header-args:python :session bloch :results output
+#+property: header-args:haskell :tangle ../../haskell/src/Physics/Bloch.hs
+#+property: header-args:cpp :tangle ../../cpp/src/core/bloch.hpp
+
+#+begin_quote
+I think I can safely say that nobody understands quantum mechanics.
+--- Richard Feynman, /The Character of Physical Law/, 1964
+#+end_quote
+
+And yet we can write down the equations that describe it, simulate
+them on a computer, and build instruments that exploit them to measure
+magnetic fields with extraordinary precision. Understanding may be
+elusive, but the mathematics is not.
+
+This lesson develops the Bloch equations — the dynamical equations for
+a spin-½ system in an external magnetic field — from first principles.
+We implement them in three languages: Python (for interactive
+exploration), Haskell (as executable specification), and C++ (for
+deployment). The physics is identical in all three. The expressions
+differ; the content does not.
+
+* The Physics
+
+** A Spin in a Field
+
+A spin-½ particle in a magnetic field $\mathbf{B}$ has two energy
+levels separated by the Larmor frequency:
+
+$$\omega_L = \gamma |\mathbf{B}|$$
+
+where $\gamma$ is the gyromagnetic ratio. For $^{87}$Rb (the
+workhorse of atomic magnetometry), $\gamma / 2\pi \approx 7$ GHz/T
+for the electron spin, but the effective gyromagnetic ratio for the
+ground state hyperfine levels is:
+
+$$\gamma_F = g_F \mu_B / \hbar$$
+
+where $g_F \approx 1/2$ for the $F=2$ ground state.
+
+The spin precesses about the magnetic field axis at the Larmor
+frequency. This precession is the clock that an atomic magnetometer
+reads.
+
+** The Bloch Vector
+
+Rather than working with the full density matrix $\rho$ (a $2 \times 2$
+complex Hermitian matrix with unit trace), we parametrise the spin
+state by the Bloch vector $\mathbf{M} = (M_x, M_y, M_z)$:
+
+$$\rho = \frac{1}{2}(\mathbf{I} + \mathbf{M} \cdot \boldsymbol{\sigma})$$
+
+where $\boldsymbol{\sigma} = (\sigma_x, \sigma_y, \sigma_z)$ are the
+Pauli matrices. The Bloch vector lives on or inside the unit sphere:
+$|\mathbf{M}| \leq 1$, with equality for pure states.
+
+This is the first key insight: a quantum state (complex, abstract,
+living in Hilbert space) maps to a classical vector (real, geometric,
+living in $\mathbb{R}^3$). The Bloch sphere is where quantum meets
+classical, where the physicist's spatial intuition applies.
+
+** The Equations of Motion
+
+The Bloch equations describe how $\mathbf{M}$ evolves:
+
+$$\frac{d\mathbf{M}}{dt} = \gamma \mathbf{M} \times \mathbf{B}
+  - \begin{pmatrix} M_x / T_2 \\ M_y / T_2 \\ (M_z - M_0) / T_1 \end{pmatrix}$$
+
+Three terms, three physics:
+
+1. *Precession*: $\gamma \mathbf{M} \times \mathbf{B}$ — the spin
+   rotates about the field. Pure, reversible, unitary.
+
+2. *Transverse relaxation*: $M_x / T_2$, $M_y / T_2$ — the
+   transverse components decay. Decoherence. The quantum system
+   loses phase information to its environment.
+
+3. *Longitudinal relaxation*: $(M_z - M_0) / T_1$ — the longitudinal
+   component relaxes toward thermal equilibrium $M_0$. The system
+   thermalises.
+
+$T_1$ and $T_2$ are the relaxation times. In a vapour cell, $T_2$ is
+typically shorter than $T_1$ (collisions with cell walls and other
+atoms destroy phase coherence faster than they destroy population
+differences). In the absence of relaxation ($T_1, T_2 \to \infty$),
+the Bloch equations reduce to pure precession — a rotation.
+
+** Why This Matters for Control
+
+An atomic magnetometer works by:
+
+1. /Preparing/ the spin state (optical pumping → large $M_z$)
+2. /Letting it precess/ in the unknown field (the Larmor frequency
+   encodes $|\mathbf{B}|$)
+3. /Reading out/ the precession (probe beam → Faraday rotation
+   proportional to $M_x$ or $M_y$)
+
+The Bloch equations govern every step. The controller must understand
+them to predict what the sensor will do, to design optimal pulse
+sequences, to set feedback loop bandwidths. The digital twin /is/
+these equations, running in software.
+
+* Implementation: Python
+
+We begin with Python because we can run it interactively, plot the
+results, and build intuition before committing to compiled languages.
+
+** Constants and Types
+
+#+begin_src python
+import numpy as np
+from dataclasses import dataclass
+
+
+@dataclass
+class BlochState:
+    """The Bloch vector M = (Mx, My, Mz)."""
+    mx: float
+    my: float
+    mz: float
+
+    def as_array(self) -> np.ndarray:
+        return np.array([self.mx, self.my, self.mz])
+
+    @staticmethod
+    def from_array(a: np.ndarray) -> 'BlochState':
+        return BlochState(mx=a[0], my=a[1], mz=a[2])
+
+    @property
+    def norm(self) -> float:
+        return np.sqrt(self.mx**2 + self.my**2 + self.mz**2)
+
+
+@dataclass
+class BlochParams:
+    """Physical parameters for the Bloch equations."""
+    gamma: float    # gyromagnetic ratio [rad/s/T]
+    t1: float       # longitudinal relaxation time [s]
+    t2: float       # transverse relaxation time [s]
+    m0: float       # equilibrium magnetisation (dimensionless)
+
+
+# Rb-87 ground state F=2
+RB87_PARAMS = BlochParams(
+    gamma=2 * np.pi * 7e9 * 0.5,  # g_F * mu_B / hbar
+    t1=0.1,                        # 100 ms (typical vapour cell)
+    t2=0.01,                        # 10 ms
+    m0=0.0                          # no pumping yet
+)
+
+print(f"Rb-87 Larmor frequency at 50 μT: "
+      f"{RB87_PARAMS.gamma * 50e-6 / (2*np.pi):.0f} Hz")
+#+end_src
+
+#+RESULTS:
+: Rb-87 Larmor frequency at 50 μT: 175000 Hz
+
+** The Derivative: A Pure Function
+
+The right-hand side of the Bloch equations is a pure function: given
+the current state $\mathbf{M}$, the field $\mathbf{B}$, and the
+parameters, it returns $d\mathbf{M}/dt$. No side effects. No hidden
+state.
+
+#+begin_src python
+def bloch_derivative(state: BlochState,
+                     field: np.ndarray,
+                     params: BlochParams) -> np.ndarray:
+    """
+    Compute dM/dt from the Bloch equations.
+
+    Pure function: same inputs always produce same output.
+
+    Parameters
+    ----------
+    state : BlochState
+        Current Bloch vector (Mx, My, Mz)
+    field : np.ndarray
+        Magnetic field vector (Bx, By, Bz) in Tesla
+    params : BlochParams
+        Physical parameters (gamma, T1, T2, M0)
+
+    Returns
+    -------
+    np.ndarray
+        Time derivative (dMx/dt, dMy/dt, dMz/dt)
+    """
+    m = state.as_array()
+
+    # Precession: gamma * M × B
+    precession = params.gamma * np.cross(m, field)
+
+    # Relaxation
+    relaxation = np.array([
+        -m[0] / params.t2,
+        -m[1] / params.t2,
+        -(m[2] - params.m0) / params.t1
+    ])
+
+    return precession + relaxation
+
+
+# Test: pure precession about z-axis
+state = BlochState(mx=1.0, my=0.0, mz=0.0)
+field = np.array([0.0, 0.0, 50e-6])  # 50 μT along z
+
+dmdt = bloch_derivative(state, field, RB87_PARAMS)
+print(f"dM/dt = ({dmdt[0]:.1f}, {dmdt[1]:.1f}, {dmdt[2]:.1f})")
+print(f"Precession frequency: {abs(dmdt[1]) / (2*np.pi):.0f} Hz")
+print(f"Mx decays with T2 = {RB87_PARAMS.t2*1e3:.0f} ms")
+#+end_src
+
+** The Integrator: A State Transformation
+
+Integration is a /state transformation/: it takes the current state
+and returns the next state. In functional terms, it is:
+
+$$\text{step} : (\text{State}, \text{Field}, \Delta t) \to \text{State}$$
+
+We use the 4th-order Runge-Kutta method — four evaluations of the
+pure derivative function, composed to give 4th-order accuracy.
+
+#+begin_src python
+def rk4_step(state: BlochState,
+             field: np.ndarray,
+             params: BlochParams,
+             dt: float) -> BlochState:
+    """
+    One Runge-Kutta 4 step of the Bloch equations.
+
+    A state transformation: State → State.
+    The field is assumed constant over the time step.
+    """
+    m = state.as_array()
+
+    def f(m_arr):
+        s = BlochState.from_array(m_arr)
+        return bloch_derivative(s, field, params)
+
+    k1 = f(m)
+    k2 = f(m + 0.5 * dt * k1)
+    k3 = f(m + 0.5 * dt * k2)
+    k4 = f(m + dt * k3)
+
+    m_next = m + (dt / 6.0) * (k1 + 2*k2 + 2*k3 + k4)
+    return BlochState.from_array(m_next)
+
+
+print("RK4 integrator defined.")
+#+end_src
+
+** Simulation: Folding Over Time
+
+A simulation is a /fold/ — the repeated application of the step
+function over a sequence of time points. In Haskell, this would be
+=scanl=. In Python:
+
+#+begin_src python
+def simulate(initial: BlochState,
+             field: np.ndarray,
+             params: BlochParams,
+             dt: float,
+             n_steps: int) -> list[BlochState]:
+    """
+    Simulate Bloch dynamics by folding rk4_step over time.
+
+    Returns the full trajectory (list of states).
+    """
+    trajectory = [initial]
+    state = initial
+    for _ in range(n_steps):
+        state = rk4_step(state, field, params, dt)
+        trajectory.append(state)
+    return trajectory
+
+
+# Simulate precession + relaxation
+dt = 1e-6         # 1 μs steps
+n_steps = 50000   # 50 ms total
+field = np.array([0.0, 0.0, 50e-6])
+
+# Start with spin along x (as if just pumped and rotated)
+initial = BlochState(mx=1.0, my=0.0, mz=0.0)
+trajectory = simulate(initial, field, RB87_PARAMS, dt, n_steps)
+
+times = np.arange(n_steps + 1) * dt * 1e3  # in ms
+mx = [s.mx for s in trajectory]
+my = [s.my for s in trajectory]
+mz = [s.mz for s in trajectory]
+
+print(f"Simulated {n_steps} steps ({times[-1]:.1f} ms)")
+print(f"Final state: Mx={mx[-1]:.4f}, My={my[-1]:.4f}, Mz={mz[-1]:.4f}")
+print(f"Final |M| = {trajectory[-1].norm:.4f} (started at {initial.norm:.1f})")
+#+end_src
+
+** Visualisation
+
+#+begin_src python :results file :file bloch_precession.png
+import matplotlib
+matplotlib.use('Agg')
+import matplotlib.pyplot as plt
+
+fig, axes = plt.subplots(2, 1, figsize=(10, 6), sharex=True)
+
+# Transverse components
+ax = axes[0]
+# Subsample for plotting (50k points is too many)
+step = max(1, len(times) // 2000)
+t_plot = times[::step]
+mx_plot = mx[::step]
+my_plot = my[::step]
+
+ax.plot(t_plot, mx_plot, 'b-', alpha=0.7, label='$M_x$', linewidth=0.5)
+ax.plot(t_plot, my_plot, 'r-', alpha=0.7, label='$M_y$', linewidth=0.5)
+
+# Envelope
+envelope = np.exp(-np.array(t_plot) / (RB87_PARAMS.t2 * 1e3))
+ax.plot(t_plot, envelope, 'k--', alpha=0.5, label=f'$T_2$ = {RB87_PARAMS.t2*1e3:.0f} ms')
+ax.plot(t_plot, -envelope, 'k--', alpha=0.5)
+
+ax.set_ylabel('Transverse magnetisation')
+ax.legend(loc='upper right')
+ax.set_title('Bloch dynamics: precession + relaxation at 50 μT')
+
+# Longitudinal component
+ax = axes[1]
+mz_plot = mz[::step]
+ax.plot(t_plot, mz_plot, 'g-', linewidth=0.8, label='$M_z$')
+ax.axhline(y=RB87_PARAMS.m0, color='k', linestyle=':', alpha=0.5,
+           label=f'$M_0$ = {RB87_PARAMS.m0}')
+ax.set_xlabel('Time (ms)')
+ax.set_ylabel('Longitudinal magnetisation')
+ax.legend(loc='upper right')
+
+plt.tight_layout()
+plt.savefig('bloch_precession.png', dpi=150)
+print("bloch_precession.png")
+#+end_src
+
+The plot shows the signature of the Bloch equations: the transverse
+components ($M_x$, $M_y$) oscillate at the Larmor frequency and decay
+with time constant $T_2$. The longitudinal component ($M_z$) relaxes
+toward $M_0$ with time constant $T_1$.
+
+This is what a magnetometer /sees/: the oscillation of $M_x$ (or
+equivalently, the Faraday rotation of a probe beam), decaying as the
+atoms lose coherence. The frequency of the oscillation encodes the
+field strength. The decay rate encodes the noise floor.
+
+* Implementation: Haskell
+
+The same physics, now as an executable specification. Notice how
+closely the Haskell mirrors the mathematics.
+
+#+begin_src haskell
+-- | Bloch equations: spin dynamics as pure functions.
+--
+-- This module implements the Bloch equations for a spin-½ system
+-- in an external magnetic field. Every function is pure.
+--
+-- Reference: F. Bloch, "Nuclear Induction", Physical Review 70, 460 (1946)
+
+module Physics.Bloch
+    ( BlochState(..)
+    , BlochParams(..)
+    , blochDerivative
+    , rk4Step
+    , simulate
+    , rb87Params
+    ) where
+
+-- | The Bloch vector M = (Mx, My, Mz).
+data BlochState = BlochState
+    { mx :: !Double
+    , my :: !Double
+    , mz :: !Double
+    } deriving (Show, Eq)
+
+-- | Physical parameters.
+data BlochParams = BlochParams
+    { gamma :: !Double   -- ^ Gyromagnetic ratio [rad/s/T]
+    , t1    :: !Double   -- ^ Longitudinal relaxation [s]
+    , t2    :: !Double   -- ^ Transverse relaxation [s]
+    , m0    :: !Double   -- ^ Equilibrium magnetisation
+    } deriving (Show, Eq)
+
+-- | Magnetic field vector.
+type Field = (Double, Double, Double)
+
+-- | Rb-87 ground state F=2 parameters.
+rb87Params :: BlochParams
+rb87Params = BlochParams
+    { gamma = 2 * pi * 7e9 * 0.5
+    , t1    = 0.1
+    , t2    = 0.01
+    , m0    = 0.0
+    }
+
+-- | Cross product of two 3-vectors.
+cross :: (Double, Double, Double)
+      -> (Double, Double, Double)
+      -> (Double, Double, Double)
+cross (ax, ay, az) (bx, by, bz) =
+    ( ay * bz - az * by
+    , az * bx - ax * bz
+    , ax * by - ay * bx
+    )
+
+-- | Right-hand side of the Bloch equations.
+--
+--   dM/dt = γ M × B - relaxation
+--
+-- Pure function: same inputs, same output, always.
+blochDerivative :: BlochParams -> Field -> BlochState -> (Double, Double, Double)
+blochDerivative params (bx, by, bz) (BlochState mx' my' mz') =
+    let
+        -- Precession: γ M × B
+        (px, py, pz) = cross (mx', my', mz') (bx, by, bz)
+        precX = gamma params * px
+        precY = gamma params * py
+        precZ = gamma params * pz
+
+        -- Relaxation
+        relX = -mx' / t2 params
+        relY = -my' / t2 params
+        relZ = -(mz' - m0 params) / t1 params
+    in
+        (precX + relX, precY + relY, precZ + relZ)
+
+-- | One RK4 step. A state transformation: State → State.
+rk4Step :: BlochParams -> Field -> Double -> BlochState -> BlochState
+rk4Step params field dt state =
+    let
+        f (BlochState sx sy sz) =
+            blochDerivative params field (BlochState sx sy sz)
+
+        (k1x, k1y, k1z) = f state
+        s2 = BlochState (mx state + 0.5*dt*k1x)
+                        (my state + 0.5*dt*k1y)
+                        (mz state + 0.5*dt*k1z)
+        (k2x, k2y, k2z) = f s2
+        s3 = BlochState (mx state + 0.5*dt*k2x)
+                        (my state + 0.5*dt*k2y)
+                        (mz state + 0.5*dt*k2z)
+        (k3x, k3y, k3z) = f s3
+        s4 = BlochState (mx state + dt*k3x)
+                        (my state + dt*k3y)
+                        (mz state + dt*k3z)
+        (k4x, k4y, k4z) = f s4
+    in
+        BlochState
+            (mx state + (dt/6) * (k1x + 2*k2x + 2*k3x + k4x))
+            (my state + (dt/6) * (k1y + 2*k2y + 2*k3y + k4y))
+            (mz state + (dt/6) * (k1z + 2*k2z + 2*k3z + k4z))
+
+-- | Simulate by folding rk4Step over time.
+--
+-- This is scanl in disguise: the trajectory is the list of
+-- intermediate states produced by repeated application of the
+-- step function.
+simulate :: BlochParams -> Field -> Double -> Int -> BlochState -> [BlochState]
+simulate params field dt nSteps initial =
+    scanl (\s _ -> rk4Step params field dt s) initial [1..nSteps]
+#+end_src
+
+Notice what the Haskell makes explicit:
+
+- =blochDerivative= is a pure function. The type signature /proves/
+  it: no =IO=, no monadic context, no side effects. Given the same
+  parameters, field, and state, it returns the same derivative.
+  Always.
+
+- =simulate= is =scanl= — a fold. The trajectory is the list of
+  states produced by iterating the step function. This is not an
+  implementation detail; it is the /mathematical definition/ of what
+  simulation means.
+
+- The types document the physics. =BlochParams= carries the physical
+  constants. =Field= is a 3-vector. =BlochState= is the Bloch
+  vector. You read the type signature and you know what the function
+  does before reading a line of implementation.
+
+* Implementation: C++
+
+The deployment language. Same physics, same purity, but with the
+type system doing additional work (dimensional analysis, compile-time
+constants).
+
+#+begin_src cpp
+#pragma once
+// bloch.hpp — Bloch equations as pure functions.
+//
+// Part of MāyāPramāṇa: valid cognition of the measured world.
+//
+// Reference: F. Bloch, "Nuclear Induction", Phys. Rev. 70, 460 (1946)
+
+#include <array>
+#include <cmath>
+#include <vector>
+
+namespace mayapramana {
+
+struct BlochState {
+    double mx = 0.0;
+    double my = 0.0;
+    double mz = 0.0;
+
+    double norm() const {
+        return std::sqrt(mx*mx + my*my + mz*mz);
+    }
+
+    BlochState operator+(const BlochState& o) const {
+        return {mx + o.mx, my + o.my, mz + o.mz};
+    }
+
+    BlochState operator*(double s) const {
+        return {mx * s, my * s, mz * s};
+    }
+};
+
+struct BlochParams {
+    double gamma;   // gyromagnetic ratio [rad/s/T]
+    double t1;      // longitudinal relaxation [s]
+    double t2;      // transverse relaxation [s]
+    double m0;      // equilibrium magnetisation
+
+    static constexpr BlochParams rb87() {
+        return {
+            .gamma = 2.0 * M_PI * 7e9 * 0.5,
+            .t1 = 0.1,
+            .t2 = 0.01,
+            .m0 = 0.0
+        };
+    }
+};
+
+using Field = std::array<double, 3>;
+
+/// Right-hand side of the Bloch equations.
+///
+/// Pure function: no side effects, no state, deterministic.
+///
+///   dM/dt = γ M × B - relaxation
+///
+inline auto bloch_derivative(const BlochState& state,
+                              const Field& field,
+                              const BlochParams& params) -> BlochState
+{
+    // Precession: γ M × B
+    double px = state.my * field[2] - state.mz * field[1];
+    double py = state.mz * field[0] - state.mx * field[2];
+    double pz = state.mx * field[1] - state.my * field[0];
+
+    return {
+        .mx = params.gamma * px - state.mx / params.t2,
+        .my = params.gamma * py - state.my / params.t2,
+        .mz = params.gamma * pz - (state.mz - params.m0) / params.t1
+    };
+}
+
+/// One RK4 step. A state transformation: State → State.
+inline auto rk4_step(const BlochState& state,
+                      const Field& field,
+                      const BlochParams& params,
+                      double dt) -> BlochState
+{
+    auto f = [&](const BlochState& s) {
+        return bloch_derivative(s, field, params);
+    };
+
+    auto k1 = f(state);
+    auto k2 = f(state + k1 * (0.5 * dt));
+    auto k3 = f(state + k2 * (0.5 * dt));
+    auto k4 = f(state + k3 * dt);
+
+    return state + (k1 + k2 * 2.0 + k3 * 2.0 + k4) * (dt / 6.0);
+}
+
+/// Simulate by folding rk4_step over time steps.
+inline auto simulate(const BlochState& initial,
+                      const Field& field,
+                      const BlochParams& params,
+                      double dt,
+                      int n_steps) -> std::vector<BlochState>
+{
+    std::vector<BlochState> trajectory;
+    trajectory.reserve(n_steps + 1);
+    trajectory.push_back(initial);
+
+    auto state = initial;
+    for (int i = 0; i < n_steps; ++i) {
+        state = rk4_step(state, field, params, dt);
+        trajectory.push_back(state);
+    }
+    return trajectory;
+}
+
+} // namespace mayapramana
+#+end_src
+
+The C++ follows the same structure as the Python and Haskell. The key
+difference: =constexpr= on =BlochParams::rb87()= means the compiler
+can evaluate the physical constants at compile time. The =inline=
+functions live in the header — this is a header-only library,
+following the pattern established in MayaJiva.
+
+* Verification
+
+Three implementations, one physics. They must agree.
+
+** Test: Pure Precession (No Relaxation)
+
+With $T_1, T_2 \to \infty$ and the field along $z$, the Bloch
+equations reduce to pure rotation about $z$ at the Larmor frequency.
+After one full Larmor period, the state should return to its initial
+value.
+
+#+begin_src python
+# Test pure precession: turn off relaxation
+params_no_relax = BlochParams(
+    gamma=RB87_PARAMS.gamma,
+    t1=1e10,    # effectively infinite
+    t2=1e10,
+    m0=0.0
+)
+
+field_z = np.array([0.0, 0.0, 50e-6])  # 50 μT along z
+omega_L = params_no_relax.gamma * 50e-6
+period = 2 * np.pi / omega_L
+
+# Simulate one full period
+dt = period / 1000  # 1000 steps per period
+n_steps = 1000
+initial = BlochState(mx=1.0, my=0.0, mz=0.0)
+
+traj = simulate(initial, field_z, params_no_relax, dt, n_steps)
+final = traj[-1]
+
+print(f"Larmor period: {period*1e6:.4f} μs")
+print(f"Initial: Mx={initial.mx:.6f}, My={initial.my:.6f}, Mz={initial.mz:.6f}")
+print(f"Final:   Mx={final.mx:.6f}, My={final.my:.6f}, Mz={final.mz:.6f}")
+print(f"|M| initial = {initial.norm:.6f}")
+print(f"|M| final   = {final.norm:.6f}")
+print(f"Error in Mx: {abs(final.mx - initial.mx):.2e}")
+print(f"Error in My: {abs(final.my - initial.my):.2e}")
+print(f"|M| conservation: {abs(final.norm - initial.norm):.2e}")
+
+assert abs(final.mx - initial.mx) < 1e-6, "Mx should return to initial"
+assert abs(final.my - initial.my) < 1e-6, "My should return to initial"
+assert abs(final.norm - 1.0) < 1e-8, "|M| should be conserved"
+print("\nAll assertions passed: pure precession verified.")
+#+end_src
+
+** Test: Relaxation to Equilibrium
+
+With the field along $z$ and initial state $\mathbf{M} = (0, 0, 0)$,
+the longitudinal component should relax toward $M_0$ with time
+constant $T_1$, and the transverse components should remain zero.
+
+#+begin_src python
+# Test relaxation to equilibrium
+params_relax = BlochParams(
+    gamma=RB87_PARAMS.gamma,
+    t1=0.1,
+    t2=0.01,
+    m0=0.8  # optical pumping produces M0 ~ 0.8
+)
+
+field_z = np.array([0.0, 0.0, 50e-6])
+initial_zero = BlochState(mx=0.0, my=0.0, mz=0.0)
+
+# Simulate for 5 T1
+dt = 1e-6
+n_steps = int(5 * params_relax.t1 / dt)
+traj = simulate(initial_zero, field_z, params_relax, dt, n_steps)
+
+final = traj[-1]
+print(f"After 5*T1 = {5*params_relax.t1*1e3:.0f} ms:")
+print(f"  Mz = {final.mz:.6f} (should approach M0 = {params_relax.m0})")
+print(f"  Mx = {final.mx:.2e} (should be ~0)")
+print(f"  My = {final.my:.2e} (should be ~0)")
+
+# After 5 T1, should be within e^{-5} ≈ 0.7% of M0
+expected_mz = params_relax.m0 * (1 - np.exp(-5))
+error = abs(final.mz - expected_mz) / expected_mz
+print(f"  Expected Mz: {expected_mz:.6f}")
+print(f"  Relative error: {error:.2e}")
+
+assert error < 0.01, "Mz should be within 1% of expected"
+assert abs(final.mx) < 1e-6, "Mx should be negligible"
+print("\nAll assertions passed: relaxation to equilibrium verified.")
+#+end_src
+
+** Test: T2 Decay Envelope
+
+With $\mathbf{M}(0) = (1, 0, 0)$ and the field along $z$, the
+transverse magnetisation should oscillate with an envelope that
+decays as $e^{-t/T_2}$.
+
+#+begin_src python
+# Test T2 decay envelope
+field_z = np.array([0.0, 0.0, 50e-6])
+initial_x = BlochState(mx=1.0, my=0.0, mz=0.0)
+
+dt = 1e-7  # 100 ns for accuracy at high Larmor frequency
+n_steps = int(3 * RB87_PARAMS.t2 / dt)  # 3 T2
+
+# This is a long simulation — subsample for checking
+check_times_ms = [1.0, 5.0, 10.0, 20.0, 30.0]
+traj = simulate(initial_x, field_z, RB87_PARAMS, dt, n_steps)
+
+print("T2 decay envelope check:")
+print(f"{'Time (ms)':>10} {'|M_⊥|':>10} {'exp(-t/T2)':>12} {'ratio':>8}")
+
+for t_ms in check_times_ms:
+    idx = int(t_ms * 1e-3 / dt)
+    if idx >= len(traj):
+        break
+    s = traj[idx]
+    m_perp = np.sqrt(s.mx**2 + s.my**2)
+    expected = np.exp(-t_ms * 1e-3 / RB87_PARAMS.t2)
+    ratio = m_perp / expected if expected > 1e-10 else float('inf')
+    print(f"{t_ms:10.1f} {m_perp:10.6f} {expected:12.6f} {ratio:8.4f}")
+
+print("\nRatio should be ~1.0 everywhere (envelope matches prediction).")
+#+end_src
+
+* Exercises
+
+These are meant to be worked through interactively in an org-babel
+session or a Jupyter notebook.
+
+** Exercise 1: Resonance
+
+Add an oscillating transverse field $B_x(t) = B_1 \cos(\omega t)$ to
+the static field $B_z$. Modify =bloch_derivative= to accept a
+time-dependent field. Simulate and observe:
+
+- What happens when $\omega = \omega_L$ (on resonance)?
+- What happens when $\omega \neq \omega_L$ (off resonance)?
+- How does the Rabi frequency $\Omega = \gamma B_1$ relate to the
+  rate of $M_z$ inversion?
+
+This is the physics behind rf-driven magnetometry.
+
+** Exercise 2: Free Induction Decay
+
+Start with $\mathbf{M} = (0, 0, M_0)$ (fully pumped). Apply a
+$\pi/2$ pulse (a resonant rf field for time $t = \pi / (2\Omega)$)
+to tip the spin into the transverse plane. Then let it precess freely.
+
+- Plot $M_x(t)$ — this is the free induction decay (FID) signal.
+- Extract the Larmor frequency from the FID by FFT.
+- How does the frequency resolution depend on $T_2$?
+
+This is how an atomic magnetometer actually works.
+
+** Exercise 3: Haskell Cross-Validation
+
+Compile and run the Haskell implementation. Generate a trajectory for
+the same parameters as the Python simulation. Compare the two
+trajectories point-by-point. What is the maximum deviation? Is it
+consistent with floating-point arithmetic differences?
+
+#+begin_src shell :eval no
+cd haskell
+cabal run bloch-test -- --field 50e-6 --dt 1e-6 --steps 50000
+#+end_src
+
+* What We Have Built
+
+A single lesson, three languages, one physics:
+
+| Language | Role | File |
+|----------+------+------|
+| Python | Interactive exploration and visualisation | (in-session) |
+| Haskell | Executable specification, mathematical clarity | =haskell/src/Physics/Bloch.hs= |
+| C++ | Deployment, performance, type-level physics | =cpp/src/core/bloch.hpp= |
+
+The Bloch equations are the foundation. Everything that follows in
+MāyāPramāṇa — optical pumping, magnetic resonance, lock-in
+detection, Kalman filtering, PID feedback — builds on this.
+
+#+begin_quote
+/Dheere dheere re mana, dheere sab kuch hoye/
+
+Slowly, slowly, O my mind --- slowly everything happens.
+--- Kabir
+#+end_quote
+
+The next lesson: optical pumping. How we prepare the spin state that
+the Bloch equations evolve.

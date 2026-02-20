@@ -1,0 +1,480 @@
+#+title: MāyāPramāṇa Architecture
+#+subtitle: A Functional Grammar for Quantum Sensor Control
+#+author: MāyāLucIA
+#+date: February 2026
+
+* Why Functional Programming
+
+#+begin_quote
+Physical concepts are free creations of the human mind.
+--- Albert Einstein
+#+end_quote
+
+A quantum sensor controller is a /signal processing pipeline/:
+
+#+begin_example
+Photons → Detector → Amplify → Demodulate → Estimate → Decide → Actuate
+#+end_example
+
+Each arrow is a transformation. Each transformation takes input and
+produces output. The pipeline is a /composition/ of these
+transformations.
+
+This is what functional programming /is/. Not a style preference.
+A structural recognition.
+
+** The Agent Argument
+
+When an AI agent generates code, it generates /text/ --- a sequence
+of tokens that must compose into a coherent program. The agent's
+reasoning is sequential, compositional, and stateless between
+generations. It works best when the code it produces shares these
+properties:
+
+- *Pure functions*: same input, same output. The agent can reason
+  about a function in isolation, test it in isolation, verify it in
+  isolation. No hidden state to track across the conversation.
+
+- *Composition*: the agent builds complex behaviour by chaining
+  simple transformations --- exactly as it builds complex text by
+  chaining tokens. Functional composition /is/ the agent's native
+  operation.
+
+- *Immutability*: the agent cannot reliably track temporal state
+  mutations across a codebase. If data doesn't mutate, the agent's
+  local reasoning remains globally sound.
+
+- *Types as constraints*: Markram's radical hypothesis for code.
+  Lay down a few type signatures and the implementation space is
+  constrained. The agent with types is like the physicist with
+  conservation laws --- half the work is done before the
+  calculation starts.
+
+- *Errors as values*: no invisible control flow. The agent can see
+  every failure path in the type signature. =Expected<T, Error>=
+  is a promise that failure is handled, not hidden.
+
+An imperative program is a /story/ --- you must read it
+chronologically to understand it. A functional program is a
+/diagram/ --- you can understand any node by understanding its inputs
+and outputs. Agents are better at diagrams than stories.
+
+** The Physics Argument
+
+Signal processing is function composition. This is not a metaphor.
+
+A lock-in amplifier /is/ a function:
+
+#+begin_example
+lock_in : Signal × Reference → (Amplitude, Phase)
+#+end_example
+
+A Kalman filter /is/ a stateful transformation:
+
+#+begin_example
+kalman_step : (State, Observation) → (State, Estimate)
+#+end_example
+
+A PID controller /is/ a fold over an error history:
+
+#+begin_example
+pid : (Params, ErrorHistory) → ControlSignal
+#+end_example
+
+Calling these "functional" is not imposing a programming paradigm on
+physics. It is recognising that the physics /already is/ functional.
+The sensor pipeline has always been a composition of pure
+transformations threaded through state. We are naming what was
+always there.
+
+#+begin_quote
+/Jaise til mein tel hai, jyon chakmak mein aag/
+
+As sesame contains oil, as flint contains fire.
+--- Kabir
+#+end_quote
+
+* Pure Core / Effectful Shell
+
+Following the architecture established in MayaPortal, MāyāPramāṇa
+separates pure computation from side effects.
+
+** Pure Core
+
+All physics, all signal processing, all estimation lives here.
+No hardware dependencies. No I/O. Deterministic and testable.
+
+#+begin_example
+core/
+  physics/
+    bloch.hpp          — Bloch equation dynamics
+    optical_pumping.hpp — Rate equations for optical pumping
+    magnetic_resonance.hpp — Resonance line shapes, Zeeman splitting
+    noise_models.hpp   — Shot, thermal, quantum projection noise
+
+  signal/
+    filter.hpp         — FIR, IIR, moving average, Butterworth
+    demodulate.hpp     — Lock-in detection, quadrature demodulation
+    spectral.hpp       — FFT, PSD estimation, Allan deviation
+
+  estimation/
+    kalman.hpp         — Linear and extended Kalman filters
+    particle.hpp       — Particle filters for nonlinear systems
+    bayesian.hpp       — Bayesian parameter estimation
+    cramer_rao.hpp     — Fisher information, CR bound computation
+
+  control/
+    pid.hpp            — PID with anti-windup, derivative filtering
+    lqr.hpp            — Linear-quadratic regulator
+    feedback.hpp       — Generic feedback loop composition
+
+  types/
+    signal.hpp         — Time series, frequency series
+    state.hpp          — Sensor state representations
+    measurement.hpp    — Calibrated measurement with uncertainty
+    units.hpp          — Compile-time dimensional analysis
+#+end_example
+
+Every function in the core is pure. Given the same input, it
+produces the same output. No global state. No file access. No
+hardware calls. The core is /mathematics/.
+
+** Effectful Shell
+
+Hardware interaction, real-time scheduling, data acquisition.
+Thin. Tested separately. Swappable.
+
+#+begin_example
+shell/
+  daq/
+    adc.hpp            — ADC abstraction (Red Pitaya, NI, custom)
+    dac.hpp            — DAC output for feedback
+    timing.hpp         — Pulse sequence generation, trigger logic
+
+  drivers/
+    red_pitaya.hpp     — Red Pitaya FPGA board interface
+    ni_daq.hpp         — National Instruments DAQ interface
+    serial.hpp         — Serial/UART for custom hardware
+
+  io/
+    data_logger.hpp    — Time-stamped data recording
+    config.hpp         — Experiment configuration loading
+    network.hpp        — Remote monitoring, parameter tuning
+#+end_example
+
+The shell is where side effects live. It is as thin as possible.
+A different lab can swap =red_pitaya.hpp= for =ni_daq.hpp= without
+touching any physics code. The pure core does not know and does not
+care what hardware it runs on.
+
+* The Monadic Composition Vocabulary
+
+Inherited from MayaPortal, adapted for sensor control.
+
+| Pattern | C++ Spelling | Role in Sensor Control |
+|---------+--------------+------------------------|
+| *Expected* | =std::expected<T, E>= | Every hardware op can fail: ADC timeout, DAC overrange, calibration divergence |
+| *State* | =S → (T, S)= | Kalman filter state, PID integrator state, lock-in phase |
+| *Reader* | =const SensorConfig&= | Immutable experiment parameters: modulation frequency, integration time, setpoints |
+| *Writer* | =(T, Diagnostics)= | Allan deviation accumulation, noise floor tracking, lock quality metrics |
+| *Stream* | Lazy sequences | Continuous data acquisition as infinite lazy sequence of samples |
+
+** Composition Example: A Magnetometer Loop
+
+The core control loop, expressed as a composition of pure functions:
+
+#+begin_src
+acquire        : DAQConfig → IO<RawSignal>           -- effectful (shell)
+demodulate     : RawSignal × Reference → Quadratures  -- pure (core)
+estimate_field : Quadratures × KalmanState             -- pure (core)
+                   → (FieldEstimate, KalmanState)
+compute_error  : FieldEstimate × Setpoint → Error      -- pure (core)
+pid_step       : Error × PIDState → (Control, PIDState) -- pure (core)
+apply_feedback : Control → IO<()>                      -- effectful (shell)
+#+end_src
+
+The pipeline reads top to bottom. Effects appear only at the
+boundaries: =acquire= and =apply_feedback=. Everything in between
+is pure mathematics that can be tested without hardware, simulated
+without a magnetometer, verified without a lab.
+
+** Stream Processing
+
+A sensor produces data continuously. The natural abstraction is a
+/stream/ --- a lazy, potentially infinite sequence of values.
+
+#+begin_src
+type SensorStream a = () → (a, SensorStream a)
+#+end_src
+
+Streams compose:
+
+#+begin_src
+raw_samples                               -- Stream<ADCSample>
+  |> map(calibrate)                       -- Stream<Voltage>
+  |> window(1024)                         -- Stream<Window<Voltage>>
+  |> map(demodulate(reference_freq))      -- Stream<Quadratures>
+  |> scan(kalman_step, initial_state)     -- Stream<FieldEstimate>
+  |> map(compute_allan_deviation)         -- Stream<AllanDev>
+#+end_src
+
+Each =map= and =scan= is a pure function. The stream itself is
+lazy --- it pulls data from the ADC only when consumed. The
+composition is declarative: you say /what/ transformations to apply,
+not /how/ to loop over samples.
+
+* The Type System as Physics
+
+#+begin_quote
+The supreme task of the physicist is to arrive at those universal
+elementary laws from which the cosmos can be built up by pure
+deduction.
+--- Albert Einstein
+#+end_quote
+
+Types encode physical constraints at compile time.
+
+** Dimensional Analysis
+
+#+begin_src cpp
+template<int M, int L, int T, int I>
+struct Quantity {
+    double value;
+    // ... arithmetic operators that propagate dimensions
+};
+
+using Tesla     = Quantity<1, 0, -2, -1>;   // kg·s⁻²·A⁻¹
+using Ampere    = Quantity<0, 0, 0, 1>;
+using Hertz     = Quantity<0, 0, -1, 0>;
+using Seconds   = Quantity<0, 0, 1, 0>;
+using PerRtHz   = Quantity<0, 0, 1, 0>;     // sensitivity units
+
+// This compiles:
+Tesla field = current * coil_constant;
+
+// This does not compile:
+Tesla field = frequency * time;  // dimension mismatch
+#+end_src
+
+A dimensional error caught at compile time is a bug that never
+reaches the sensor. The type system enforces what the physicist
+knows: you cannot add teslas to hertz.
+
+** State Machine Types
+
+A quantum sensor has well-defined states:
+
+#+begin_src cpp
+struct Idle {};
+struct Pumping { Duration pump_time; };
+struct Probing { Frequency probe_freq; };
+struct Readout { ADCSample sample; };
+
+using SensorState = std::variant<Idle, Pumping, Probing, Readout>;
+#+end_src
+
+Transitions between states are functions:
+
+#+begin_src cpp
+auto start_pump(Idle) → Pumping;
+auto begin_probe(Pumping) → Probing;
+auto trigger_readout(Probing) → Readout;
+auto process(Readout) → Idle;
+#+end_src
+
+Invalid transitions (e.g., readout from idle) are /unrepresentable/.
+The type system makes illegal states impossible to construct, not
+merely difficult to reach.
+
+** Measurement with Uncertainty
+
+#+begin_src cpp
+template<typename Q>
+struct Measurement {
+    Q value;
+    Q uncertainty;       // 1-sigma
+    double confidence;   // p-value or posterior probability
+    Timestamp when;
+    std::string method;  // "kalman", "mle", "bayesian"
+};
+#+end_src
+
+A measurement without uncertainty is not a measurement. The type
+system enforces this: you cannot construct a =Measurement= without
+stating your uncertainty. Dharmakīrti's /arthakriyāsāmarthya/ ---
+the capacity for effective action --- encoded as a type constraint.
+
+* Sensor Abstraction: The Universal Grammar
+
+Different sensors share the same epistemic structure.
+
+#+begin_src cpp
+template<typename Physics, typename State, typename Observable>
+concept QuantumSensor = requires(Physics p, State s) {
+    // The physics: how the quantum state evolves
+    { p.evolve(s, dt) } → State;
+
+    // The measurement: what we observe
+    { p.observe(s) } → Observable;
+
+    // The noise: what limits our knowledge
+    { p.noise_model(s) } → NoiseSpectrum;
+
+    // The Fisher information: how precisely we can know
+    { p.fisher_information(s) } → Matrix;
+};
+#+end_src
+
+An atomic magnetometer satisfies this concept. So does an NV-diamond
+sensor. So does a gravimeter. The physics differs; the grammar does
+not.
+
+This is /upamāna/ --- the Nyāya pramāṇa of analogy. We learn about
+one sensor by recognising its structural kinship with another. The
+concept (in the C++20 sense) /is/ the analogy, made formal.
+
+* Testing as Pramāṇa
+
+Every function in the core is testable without hardware.
+
+#+begin_src cpp
+TEST_CASE("Kalman filter converges to true field") {
+    auto true_field = 50e-6_T;  // 50 μT
+    auto noise = 1e-9_T;        // 1 nT/√Hz
+    auto dt = 0.001_s;
+
+    auto state = KalmanState::initial(0_T, 1e-3_T);
+
+    for (int i = 0; i < 10000; ++i) {
+        auto obs = true_field + noise * randn();
+        state = kalman_step(state, obs, dt);
+    }
+
+    CHECK(abs(state.estimate - true_field) < 3 * noise / sqrt(10000));
+    CHECK(state.uncertainty < noise / sqrt(10000) * 1.1);
+}
+
+TEST_CASE("PID holds lock under field step") {
+    auto pid = PIDParams{.kp = 100, .ki = 1000, .kd = 0.1};
+    auto state = PIDState::zero();
+    auto setpoint = 0_T;
+    auto field = 0_T;
+
+    // Step the field
+    field = 1e-6_T;
+
+    for (int i = 0; i < 1000; ++i) {
+        auto error = measure(field) - setpoint;
+        auto [control, new_state] = pid_step(error, state, pid);
+        field = field - control * actuator_gain;
+        state = new_state;
+    }
+
+    CHECK(abs(field - setpoint) < 1e-9_T);  // Settled to < 1 nT
+}
+
+TEST_CASE("Sensitivity reaches Cramér-Rao bound") {
+    auto sensor = AtomicMagnetometer{/* params */};
+    auto fisher = sensor.fisher_information(operating_point);
+    auto cr_bound = 1.0 / sqrt(fisher);
+
+    auto achieved = monte_carlo_sensitivity(sensor, N_trials);
+
+    CHECK(achieved < cr_bound * 1.2);  // Within 20% of fundamental limit
+}
+#+end_src
+
+The tests /are/ the claims. The verified manuscript for
+MāyāPramāṇa will link each sensitivity number, each convergence
+rate, each noise floor to the test that proves it.
+
+* Implementation Language
+
+C++ with C++23 features, following MayaPortal conventions:
+
+- =std::expected= for error handling (no exceptions)
+- =std::variant= for state machines
+- C++20 concepts for sensor abstraction
+- Templates for dimensional analysis
+- =constexpr= for compile-time physics constants
+- Ranges and views for stream processing where available
+
+Python bindings via pybind11 for:
+
+- Interactive exploration (Jupyter/org-babel)
+- Rapid prototyping of new sensor models
+- Plotting and analysis (matplotlib, scipy)
+- Integration with QuTiP for quantum state simulation
+
+The C++ core is the production controller. The Python bindings are
+the physicist's workbench. Both call the same pure functions.
+
+* Digital Twin Methodology
+
+Following MāyāLucIA's established cycle:
+
+#+begin_example
+Measure → Model → Manifest → Evaluate → Refine
+#+end_example
+
+Applied to quantum sensor control:
+
+1. *Measure*: characterise the real sensor --- noise spectrum,
+   bandwidth, resonance line shape, systematic offsets
+2. *Model*: build the digital twin --- Bloch equations, noise models,
+   feedback simulation
+3. *Manifest*: run the digital twin --- simulate the full control
+   loop, generate synthetic data
+4. *Evaluate*: compare twin to reality --- does the simulated Allan
+   deviation match the measured one? Does the simulated lock range
+   match?
+5. *Refine*: update the model --- add the systematic effect you
+   missed, refine the noise model, improve the feedback
+
+The digital twin is not a one-time construction. It is a living model
+that grows with the physicist's understanding of their instrument.
+
+* First Target: Atomic Magnetometer
+
+The first digital twin will model a Bell-Bloom atomic magnetometer:
+
+| Component | Physics | Pure Function |
+|-----------+---------+---------------|
+| Optical pumping | Rate equations for F=3→F'=4 | =pump_step(state, laser) → state= |
+| Larmor precession | Bloch equations in external field | =precess(state, B, dt) → state= |
+| RF driving | Magnetic resonance at Larmor frequency | =drive(state, rf, dt) → state= |
+| Readout | Faraday rotation or absorption | =observe(state) → signal= |
+| Lock-in | Demodulation at modulation frequency | =demodulate(signal, ref) → (X, Y)= |
+| Feedback | PID on demodulated error signal | =pid_step(error, state) → control= |
+
+Each row is a pure function. The composition is the controller.
+The tests verify each function independently and the composition
+end-to-end.
+
+* Relation to MāyāLucIA
+
+MāyāPramāṇa is a MāyāLucIA project. It inherits:
+
+- *Pure core / effectful shell* from MayaPortal
+- *Monadic composition vocabulary* from MayaPortal
+- *Verified manuscript methodology* from bravli
+- *Test-driven science* from bravli (293 tests and counting)
+- *Literate programming* in org-mode throughout
+- *Sparse-to-dense reconstruction* (Markram's radical hypothesis)
+- *Human-AI collaboration* (MayaDevGenI principles)
+
+What it adds:
+
+- *Real-time control* --- MayaPortal renders frames; MāyāPramāṇa
+  closes feedback loops
+- *Quantum physics* --- Bloch equations, quantum noise limits,
+  Fisher information
+- *Metrology* --- Allan deviation, Cramér-Rao bounds, systematic
+  error budgets
+- *Hardware interface* --- DAQ, ADC/DAC, FPGA interaction
+
+-----
+
+/This architecture document accompanies the [[file:manifesto.org][MāyāPramāṇa manifesto]].
+The manifesto explains /why/. This document explains /how/.
+The tests will explain /whether/./

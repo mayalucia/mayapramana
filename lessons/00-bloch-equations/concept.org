@@ -52,9 +52,12 @@ frequency. This precession is the clock that an atomic magnetometer
 reads.
 
 #+BEGIN_CADENZA
-:concept    spin-half-qm
-:level      first-year-grad
-:prereqs    classical-mechanics angular-momentum
+:concept       spin-half-qm
+:level         first-year-grad
+:prereqs       classical-mechanics angular-momentum
+:assumes       larmor-frequency gyromagnetic-ratio
+:anti-targets  quantum-field-theory relativistic-spin
+:connects-to   bloch-sphere-geometry
 If you have not seen spin-½ before: explain what it means for a
 particle to have intrinsic angular momentum that is quantised to
 two values. Start from the Stern-Gerlach experiment (a beam of
@@ -83,9 +86,12 @@ living in $\mathbb{R}^3$). The Bloch sphere is where quantum meets
 classical, where the physicist's spatial intuition applies.
 
 #+BEGIN_CADENZA
-:concept    bloch-sphere-geometry
-:level      first-year-grad
-:prereqs    linear-algebra complex-numbers
+:concept       bloch-sphere-geometry
+:level         first-year-grad
+:prereqs       linear-algebra complex-numbers
+:assumes       spin-half-qm pauli-matrices
+:anti-targets  higher-spin-systems qubit-gates
+:connects-to   equations-of-motion
 Why does the Bloch sphere work? A 2×2 density matrix has 4 real
 parameters minus 2 constraints (unit trace + Hermiticity), leaving
 3 real degrees of freedom — exactly a point in R³. Walk through
@@ -140,9 +146,12 @@ sequences, to set feedback loop bandwidths. The digital twin /is/
 these equations, running in software.
 
 #+BEGIN_CADENZA
-:concept    atomic-magnetometry
-:level      first-year-grad
-:prereqs    bloch-equations electromagnetic-waves
+:concept       atomic-magnetometry
+:level         first-year-grad
+:prereqs       electromagnetic-waves optics
+:assumes       bloch-equations larmor-frequency T1-T2-relaxation
+:anti-targets  SQUID-engineering cryogenics
+:connects-to   optical-pumping-lesson-01
 How does a set of differential equations become a magnetic field
 measurement? Walk through the three stages concretely for an
 optically pumped magnetometer (OPM): (1) Optical pumping — a
@@ -312,9 +321,12 @@ print("RK4 integrator defined.")
 #+end_src
 
 #+BEGIN_CADENZA
-:concept    numerical-ode-methods
-:level      first-year-grad
-:prereqs    calculus taylor-series
+:concept       numerical-ode-methods
+:level         first-year-grad
+:prereqs       calculus taylor-series
+:assumes       bloch-derivative pure-functions
+:anti-targets  symplectic-integrators spectral-methods
+:connects-to   simulation-fold
 Why Runge-Kutta and not just Euler? Start from the definition of a
 derivative as a limit, and show that Euler's method (one evaluation
 of f, first-order) accumulates error proportional to dt. Then build

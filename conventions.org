@@ -467,6 +467,67 @@ BibTeX for formal references:
 
 Never fabricate citations. If uncertain, say so.
 
+* MāyāLoom Conventions
+
+MāyāPramāṇa lessons follow the [[https://github.com/mayalucia/mayalucia][MāyāLoom]] convention — org files
+structured for both human and machine readers. The full manifesto is
+in the parent project at =project/mayaloom.org=.
+
+** Loom Manifest
+
+Every =concept.org= carries a machine-readable header:
+
+#+begin_example
+,#+LOOM:     lesson
+,#+DEFINES:  BlochState BlochParams bloch_derivative rk4_step simulate
+,#+DEPENDS:  (none)
+,#+EXPORTS:  bloch_precession.png
+,#+CADENZAS: spin-half-qm bloch-sphere-geometry numerical-ode-methods
+#+end_example
+
+| Keyword | Purpose |
+|---------+---------|
+| =#+LOOM= | Document type: =lesson=, =plan=, =seed= |
+| =#+DEFINES= | Concepts/functions this lesson introduces |
+| =#+DEPENDS= | Other lessons or prerequisites required |
+| =#+EXPORTS= | Artifacts produced (reference data, plots) |
+| =#+CADENZAS= | Named expansion points, discoverable by agents |
+
+** Cadenza Blocks
+
+Expansion points where an agent generates a contextual tutorial:
+
+#+begin_example
+,#+BEGIN_CADENZA
+:concept      spin-half-qm
+:level        first-year-grad
+:prereqs      classical-mechanics angular-momentum
+:assumes      larmor-frequency gyromagnetic-ratio
+:anti-targets quantum-field-theory relativistic-effects
+:connects-to  bloch-sphere-geometry
+[Prose prompt describing what to explain, for whom, from what
+starting point, connecting to what notation in this lesson.]
+,#+END_CADENZA
+#+end_example
+
+| Field | Required | Meaning |
+|-------+----------+---------|
+| =:concept= | yes | Slug identifying this cadenza |
+| =:level= | yes | Target: =undergrad=, =first-year-grad=, =researcher= |
+| =:prereqs= | yes | What the reader should know but may need reminding of |
+| =:assumes= | no | What this lesson already taught — do not repeat |
+| =:anti-targets= | no | Topics to explicitly not cover |
+| =:connects-to= | no | Forward references to later sections/cadenzas |
+
+** Agent Protocol for Cadenza Expansion
+
+1. Read the =#+LOOM= manifest to orient
+2. Find the cadenza matching the student's question
+3. Read =:level= and =:prereqs= to calibrate pitch
+4. Read surrounding lesson context (at minimum the enclosing section)
+5. Generate a tutorial that extends — not repeats — the lesson
+6. Use the same notation, variable names, and physical system
+
 * For AI Agents
 
 If you are an AI agent working on MāyāPramāṇa:

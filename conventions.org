@@ -1,0 +1,490 @@
+#+title: MāyāPramāṇa — Project Conventions
+#+subtitle: How We Work
+#+author: MāyāLucIA
+#+date: February 2026
+
+#+begin_quote
+Every sentence I utter must be understood not as an affirmation,
+but as a question.
+--- Niels Bohr
+#+end_quote
+
+This document defines how MāyāPramāṇa is organised, written, built,
+and versioned. It inherits conventions from MayaPortal and MayaDevGenI,
+adapted for a multilingual (Python, Haskell, C++) scientific project
+aimed at both human and machine intelligences.
+
+* The Cardinal Rule
+
+The =.org= files are the source of truth. Generated source files
+(=.hs=, =.hpp=, =.py=) are artifacts extracted via =org-babel-tangle=.
+
+#+begin_example
+lessons/NN-topic/concept.org    ← EDIT HERE
+    ↓ org-babel-tangle
+haskell/src/Physics/Bloch.hs    ← GENERATED
+cpp/src/core/bloch.hpp          ← GENERATED
+python/mayapramana/bloch.py     ← GENERATED (if tangled)
+#+end_example
+
+Never edit generated source files directly. Changes will be
+overwritten on next tangle, and the lesson narrative will
+desynchronise from the code.
+
+*Tangle invocation*:
+#+begin_src shell :eval no
+emacs --batch -l org --eval '(org-babel-tangle-file "lessons/00-bloch-equations/concept.org")'
+#+end_src
+
+Or via build system (when CMake/Cabal/Make targets are set up):
+#+begin_src shell :eval no
+make tangle
+#+end_src
+
+* Directory Structure
+
+#+begin_example
+mayapramana/
+├── manifesto.org               # Why this project exists
+├── architecture.org            # How it's designed (FP grammar)
+├── conventions.org             # This file
+├── CLAUDE.md                   # For AI collaborators
+│
+├── lessons/                    # LITERATE SOURCE (Org files)
+│   ├── 00-bloch-equations/
+│   │   └── concept.org         # Lesson 00
+│   ├── 01-optical-pumping/
+│   │   └── concept.org         # Lesson 01
+│   └── NN-topic/
+│       ├── concept.org         # Main lesson (theory + code)
+│       └── workbook.org        # Exercises (optional)
+│
+├── haskell/                    # EXECUTABLE SPECIFICATION
+│   ├── mayapramana.cabal       # Build file
+│   ├── src/
+│   │   ├── Physics/
+│   │   │   ├── Bloch.hs        # Tangled from lesson 00
+│   │   │   ├── OpticalPumping.hs
+│   │   │   └── Noise.hs
+│   │   ├── Signal/
+│   │   │   ├── Filter.hs
+│   │   │   ├── Demodulate.hs
+│   │   │   └── Spectral.hs
+│   │   ├── Estimation/
+│   │   │   ├── Kalman.hs
+│   │   │   └── CramerRao.hs
+│   │   └── Control/
+│   │       ├── PID.hs
+│   │       └── Feedback.hs
+│   └── test/
+│       └── Spec.hs             # QuickCheck properties
+│
+├── cpp/                        # DEPLOYMENT CODE
+│   ├── CMakeLists.txt
+│   ├── src/
+│   │   └── core/               # Pure: no hardware deps
+│   │       ├── bloch.hpp        # Tangled from lesson 00
+│   │       ├── optical_pumping.hpp
+│   │       ├── filter.hpp
+│   │       ├── kalman.hpp
+│   │       └── pid.hpp
+│   ├── shell/                  # Effectful: hardware interface
+│   │   └── daq/
+│   │       └── red_pitaya.hpp
+│   └── tests/
+│       └── test_bloch.cpp      # Catch2 tests
+│
+├── python/                     # INTERACTIVE EXPLORATION
+│   ├── mayapramana/
+│   │   ├── __init__.py
+│   │   ├── bloch.py            # May be tangled or standalone
+│   │   └── ...
+│   └── tests/
+│       └── test_bloch.py       # pytest
+│
+├── validation/                 # CROSS-LANGUAGE VERIFICATION
+│   ├── compare.py              # Load outputs, check agreement
+│   └── reference/              # Reference data (JSON/CSV)
+│
+├── collab/                     # COLLABORATION ARTIFACTS
+│   ├── index.org               # Navigation
+│   ├── context.org             # Orientation for new sessions
+│   └── sessions/
+│       └── <topic>/
+│           ├── plan.org
+│           └── spec.org
+│
+└── project/                    # DESIGN DOCUMENTS
+    ├── roadmap.org
+    └── sensor-models.org
+#+end_example
+
+* Lesson Conventions
+
+** Numbering and Naming
+
+Lessons use =NN-slug= format:
+
+| Lesson | Topic | Builds On |
+|--------+-------+-----------|
+| 00 | Bloch equations | — |
+| 01 | Optical pumping | 00 |
+| 02 | Magnetic resonance | 00, 01 |
+| 03 | Lock-in detection | 00 |
+| 04 | Kalman filtering | 00, 03 |
+| 05 | PID control | 04 |
+| 06 | Feedback loops | 03, 04, 05 |
+| ... | ... | ... |
+
+Each lesson is cumulative: it imports and extends prior lessons'
+types and functions.
+
+** Lesson Structure
+
+Every =concept.org= follows this pattern:
+
+#+begin_example
+#+title: Lesson NN — <Topic>
+#+subtitle: <One-line Essence>
+#+property: header-args :mkdirp yes
+#+property: header-args:python :session <name> :results output
+#+property: header-args:haskell :tangle ../../haskell/src/<Path>.hs
+#+property: header-args:cpp :tangle ../../cpp/src/core/<name>.hpp
+
+[Opening quote — sets the philosophical tone]
+
+* The Physics
+  Mathematical development, equations, physical intuition.
+  LaTeX for equations, prose for meaning.
+
+* Implementation: Python
+  Interactive exploration. Runs in-session via org-babel.
+  Plots, numerical experiments, building intuition.
+
+* Implementation: Haskell
+  Executable specification. Tangles to source tree.
+  Types document the physics. Purity is guaranteed.
+
+* Implementation: C++
+  Deployment code. Header-only where possible.
+  constexpr, concepts, dimensional analysis.
+
+* Verification
+  Cross-language tests. All three must agree.
+
+* Exercises
+  Guided extensions. Lead toward next lesson.
+
+[Closing quote — ties the lesson together]
+#+end_example
+
+** Multilingual Code Blocks
+
+A single lesson contains code blocks in three languages. The
+header arguments control what happens with each:
+
+*** Python: Interactive Exploration
+
+#+begin_example
+,#+begin_src python :session bloch :results output
+import numpy as np
+# Runs in a persistent session — state carries between blocks
+print(f"Larmor frequency: {omega:.0f} Hz")
+,#+end_src
+#+end_example
+
+- =:session bloch= — persistent Python session within the lesson
+- =:results output= — capture stdout as results
+- =:results file :file name.png= — for matplotlib plots
+- Generally /not/ tangled — lives in the lesson only
+- Purpose: rapid exploration, visualisation, building intuition
+
+*** Haskell: Executable Specification
+
+#+begin_example
+,#+begin_src haskell :tangle ../../haskell/src/Physics/Bloch.hs
+module Physics.Bloch where
+
+blochDerivative :: BlochParams -> Field -> BlochState -> Derivative
+blochDerivative params field state = ...
+,#+end_src
+#+end_example
+
+- =:tangle= — extracts to the Haskell source tree
+- No session (compiled language — tangle and build separately)
+- Purpose: mathematical clarity, type-level guarantees, QuickCheck
+
+*** C++: Deployment
+
+#+begin_example
+,#+begin_src cpp :tangle ../../cpp/src/core/bloch.hpp
+namespace mayapramana {
+auto bloch_derivative(const BlochState& state,
+                      const Field& field,
+                      const BlochParams& params) -> BlochState;
+}
+,#+end_src
+#+end_example
+
+- =:tangle= — extracts to the C++ source tree
+- Header-only where possible (following MayaJiva pattern)
+- Purpose: performance, type-level physics, real-time control
+
+*** Build Instructions (Non-REPL Languages)
+
+For Haskell and C++, include build/run instructions as shell blocks
+with =:eval no= (documentation, not executed):
+
+#+begin_example
+,#+begin_src shell :eval no
+cd haskell && cabal build && cabal test
+,#+end_src
+#+end_example
+
+** Exercises
+
+Each lesson ends with exercises that:
+1. Extend the lesson's physics (not busywork)
+2. Require modifying code (not just reading)
+3. Lead toward the next lesson's topic
+4. Can be done in any of the three languages
+
+* Plan + Spec Duality
+
+Every non-trivial task produces two files:
+
+| File | Audience | Content | Authority |
+|------+----------+---------+-----------|
+| =plan.org= | Human (why) | Reasoning, philosophy, design | *Canonical* |
+| =spec.org= | Machine (what) | Paths, signatures, done-when | Derived |
+
+If they disagree, =plan.org= is authoritative. The plan articulates
+intent; the spec is its mechanical realisation.
+
+** Plan.org Structure
+
+#+begin_example
+* Why This Matters
+  Context, problem, motivation
+
+* Design Philosophy
+  Architectural choices and their reasons
+
+* Implementation Strategy
+  Approach and rationale
+
+* Alternatives Considered
+  What we didn't choose and why
+#+end_example
+
+** Spec.org Structure
+
+#+begin_example
+* Bootstrap
+  | File | Purpose | Status |
+  | ... | ... | [ ] |
+
+* Interface Contract
+  ** Assumes (preconditions)
+  ** Promises (postconditions)
+
+* Implementation Steps
+  1. [ ] Step with exact paths and signatures
+  2. [ ] ...
+
+* Done-When
+  - [ ] Testable criterion 1
+  - [ ] Testable criterion 2
+#+end_example
+
+* Pure Core / Effectful Shell
+
+Inherited from MayaPortal. All physics, signal processing, and
+estimation lives in the pure core. Hardware interaction lives in the
+shell.
+
+#+begin_example
+PURE CORE (mathematics)
+├── No ADC, DAC, FPGA, filesystem, network
+├── Deterministic given same inputs
+├── Testable without hardware
+├── Cross-checkable across languages
+│
+EFFECTFUL SHELL (hardware)
+├── ADC/DAC interaction
+├── FPGA communication
+├── Data logging, network
+├── Timing and real-time scheduling
+#+end_example
+
+The pure core is where the physics lives. The shell is as thin as
+possible. A different lab can swap their hardware interface without
+touching physics code.
+
+* Errors as Values
+
+No exceptions. Use language-appropriate sum types:
+
+| Language | Type | Pattern |
+|----------+------+---------|
+| Haskell | =Either Error a= | Monadic bind for chaining |
+| C++ | =std::expected<T, Error>= | =.and_then()= for chaining |
+| Python | =Result= or return tuples | Convention (Python lacks native sum types) |
+
+Every function that can fail says so in its type signature.
+
+* Testing
+
+** Three Levels
+
+1. *Unit tests*: each pure function tested independently
+2. *Cross-language validation*: Python, Haskell, C++ must agree on
+   the same physics to within floating-point tolerance
+3. *Property-based tests* (Haskell QuickCheck): "for all valid
+   inputs, this invariant holds"
+
+** Cross-Language Validation Pattern
+
+Following MayaJiva's established approach:
+
+1. Python generates reference data (JSON)
+2. Haskell and C++ load reference data
+3. Both compute the same quantities
+4. Compare to within tolerance
+
+#+begin_example
+validation/
+  reference/
+    bloch_precession_50uT.json    # Python-generated
+  compare.py                       # Load all outputs, check
+#+end_example
+
+** Test Naming
+
+Tests are specifications:
+
+#+begin_example
+"Kalman filter converges to true field"
+"PID holds lock under field step"
+"Sensitivity reaches Cramér-Rao bound"
+"Bloch norm conserved under pure precession"
+#+end_example
+
+Not: "test1", "test_kalman", "it works".
+
+* Collaboration
+
+** Session Management
+
+#+begin_example
+collab/
+├── index.org       # All sessions, status, links
+├── context.org     # Quick orientation for new sessions
+└── sessions/
+    └── <topic>/
+        ├── plan.org
+        ├── spec.org
+        └── .archive/   # Superseded versions
+#+end_example
+
+** Context.org
+
+Fast re-entry point for any AI agent (Claude, GPT, Gemini, or other).
+Contains: project topology, active sessions, paused sessions,
+completed sessions with links.
+
+** Epistemic Hygiene
+
+Inherited from MayaDevGenI:
+
+- *Certainly*: high confidence, confirmed by tests
+- *Likely*: reasonable inference from data
+- *Plausibly*: makes sense but uncertain
+- *Speculatively*: interesting but ungrounded
+
+Never paper over uncertainty with fluent prose. If you don't know,
+say so.
+
+* Git Conventions
+
+** Commit Messages
+
+#+begin_example
+<type>(<scope>): <subject>
+
+<body (optional)>
+
+Co-Authored-By: Claude Opus 4.6 <noreply@anthropic.com>
+#+end_example
+
+Types: =feat=, =fix=, =docs=, =refactor=, =test=, =chore=
+
+Scope: =physics=, =signal=, =estimation=, =control=, =lesson=,
+=haskell=, =cpp=, =python=
+
+** Tagging
+
+Lesson milestones:
+#+begin_example
+lesson/00-bloch-equations
+lesson/01-optical-pumping
+#+end_example
+
+** Rules
+
+- Only commit when asked
+- Never push unless asked
+- Never force-push
+
+* Mathematical Content
+
+** Equations in Org
+
+Inline: =$\omega_L = \gamma B$=
+
+Display:
+#+begin_example
+$$\frac{d\mathbf{M}}{dt} = \gamma \mathbf{M} \times \mathbf{B}$$
+#+end_example
+
+LaTeX for export. Unicode fallback for terminal display.
+
+** Citations
+
+BibTeX for formal references:
+#+begin_example
+,#+begin_src bibtex :tangle references.bib
+@article{bloch1946,
+  author  = {Bloch, Felix},
+  title   = {Nuclear Induction},
+  journal = {Physical Review},
+  volume  = {70},
+  pages   = {460--474},
+  year    = {1946}
+}
+,#+end_src
+#+end_example
+
+Never fabricate citations. If uncertain, say so.
+
+* For AI Agents
+
+If you are an AI agent working on MāyāPramāṇa:
+
+1. *Read this file first.* Then =manifesto.org=, then =architecture.org=.
+2. *You are a thinking partner.* Push back on flawed reasoning.
+3. *The org files are the source of truth.* Never edit tangled source.
+4. *Pure core / effectful shell.* Physics is pure. Hardware is shell.
+5. *Three languages.* Python for exploration, Haskell for specification,
+   C++ for deployment. All must agree.
+6. *Every claim must be tested.* No untested assertions about physics.
+7. *Epistemic hygiene.* Separate known from inferred from speculated.
+8. *The human (mu2tau / visood)*: PhD theoretical physicist, 20 years
+   experience, high-proficiency C++ and Python, learning Haskell.
+   Works in Emacs. Do not over-explain.
+
+-----
+
+/These conventions are living. They will evolve as the project grows.
+What will not change: the org files are the source of truth, the
+physics must be tested, and the collaboration must push back./

@@ -2,6 +2,11 @@
 #+subtitle: Spin Dynamics as Pure Functions
 #+author: MāyāPramāṇa
 #+date: February 2026
+#+LOOM: lesson
+#+DEFINES: BlochState BlochParams bloch_derivative rk4_step simulate rb87Params
+#+DEPENDS: (none)
+#+EXPORTS: bloch_precession.png
+#+CADENZAS: spin-half-qm bloch-sphere-geometry numerical-ode-methods atomic-magnetometry
 #+property: header-args :mkdirp yes
 #+property: header-args:python :session bloch :results output
 #+property: header-args:haskell :tangle ../../haskell/src/Physics/Bloch.hs
@@ -46,6 +51,20 @@ The spin precesses about the magnetic field axis at the Larmor
 frequency. This precession is the clock that an atomic magnetometer
 reads.
 
+#+BEGIN_CADENZA
+:concept    spin-half-qm
+:level      first-year-grad
+:prereqs    classical-mechanics angular-momentum
+If you have not seen spin-½ before: explain what it means for a
+particle to have intrinsic angular momentum that is quantised to
+two values. Start from the Stern-Gerlach experiment (a beam of
+silver atoms splits into two — not a continuum — in an inhomogeneous
+magnetic field). Connect to the gyromagnetic ratio: why does a
+magnetic moment precess in a field, and why is the quantum version
+discrete? The student knows classical angular momentum and torque
+but has not seen Dirac notation or Hilbert spaces.
+#+END_CADENZA
+
 ** The Bloch Vector
 
 Rather than working with the full density matrix $\rho$ (a $2 \times 2$
@@ -62,6 +81,22 @@ This is the first key insight: a quantum state (complex, abstract,
 living in Hilbert space) maps to a classical vector (real, geometric,
 living in $\mathbb{R}^3$). The Bloch sphere is where quantum meets
 classical, where the physicist's spatial intuition applies.
+
+#+BEGIN_CADENZA
+:concept    bloch-sphere-geometry
+:level      first-year-grad
+:prereqs    linear-algebra complex-numbers
+Why does the Bloch sphere work? A 2×2 density matrix has 4 real
+parameters minus 2 constraints (unit trace + Hermiticity), leaving
+3 real degrees of freedom — exactly a point in R³. Walk through
+this counting. Show how the Pauli matrices form a basis for
+traceless Hermitian 2×2 matrices. Explain why pure states live on
+the surface (|M|=1) and mixed states inside (|M|<1), and what
+"mixed" means physically — not that we don't know the state, but
+that the spin is entangled with its environment. The student knows
+matrix algebra and complex numbers but has not seen density
+matrices or quantum decoherence.
+#+END_CADENZA
 
 ** The Equations of Motion
 
@@ -103,6 +138,29 @@ The Bloch equations govern every step. The controller must understand
 them to predict what the sensor will do, to design optimal pulse
 sequences, to set feedback loop bandwidths. The digital twin /is/
 these equations, running in software.
+
+#+BEGIN_CADENZA
+:concept    atomic-magnetometry
+:level      first-year-grad
+:prereqs    bloch-equations electromagnetic-waves
+How does a set of differential equations become a magnetic field
+measurement? Walk through the three stages concretely for an
+optically pumped magnetometer (OPM): (1) Optical pumping — a
+circularly polarised laser drives transitions that accumulate
+population in one Zeeman sublevel, creating a large Mz. Connect
+to the Bloch equations: pumping is an effective M0 term.
+(2) Precession — the pump is turned off (or a dark period begins),
+and the spin precesses at the Larmor frequency ω_L = γ|B|. This
+is the cross-product term, pure rotation. (3) Readout — a linearly
+polarised probe beam acquires Faraday rotation proportional to Mx,
+converting spin dynamics into an optical signal. The sensitivity
+limit is set by spin-projection noise: δB ~ 1/(γ √(n T2)), where
+n is the atom number. Mention that SERF magnetometers (spin-exchange
+relaxation free) achieve fT/√Hz by operating at zero field where
+spin-exchange collisions stop broadening. The student understands
+the Bloch equations from this lesson but has not seen how they
+connect to an actual sensor.
+#+END_CADENZA
 
 * Implementation: Python
 
@@ -252,6 +310,25 @@ def rk4_step(state: BlochState,
 
 print("RK4 integrator defined.")
 #+end_src
+
+#+BEGIN_CADENZA
+:concept    numerical-ode-methods
+:level      first-year-grad
+:prereqs    calculus taylor-series
+Why Runge-Kutta and not just Euler? Start from the definition of a
+derivative as a limit, and show that Euler's method (one evaluation
+of f, first-order) accumulates error proportional to dt. Then build
+up: midpoint method (two evaluations, second-order), and finally
+RK4 (four evaluations, fourth-order). The key insight is that each
+intermediate evaluation samples the slope at a different point in
+the step, and the weighted average cancels lower-order error terms
+— the same idea as Simpson's rule for integration. Show the error
+scaling: halving dt reduces Euler error by 2× but RK4 error by 16×.
+When does RK4 break down? Stiff systems (when T2 << dt, the
+exponential decay demands implicit methods). The student knows
+calculus and Taylor series but has not implemented a numerical
+integrator before.
+#+END_CADENZA
 
 ** Simulation: Folding Over Time
 

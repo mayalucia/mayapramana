@@ -1,0 +1,1354 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>MāyāPramāṇa — Universal Quantum Sensor Controller</title>
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: Georgia, 'Times New Roman', 'Noto Serif', serif;
+  font-size: 17px;
+  line-height: 1.7;
+  color: #2d2d2d;
+  background: #fafaf8;
+  max-width: 60em;
+  margin: 0 auto;
+  padding: 2em 2em 4em;
+}
+
+a { color: #2d6a8a; text-decoration: none; }
+a:hover { text-decoration: underline; }
+
+header {
+  text-align: center;
+  border-bottom: 1px solid #ddd;
+  padding-bottom: 2em;
+  margin-bottom: 2em;
+}
+
+h1.site-title {
+  font-size: 2.2em;
+  font-weight: 700;
+  line-height: 1.2;
+  color: #1a1a1a;
+  margin-bottom: 0.2em;
+}
+
+.site-subtitle {
+  font-size: 1.1em;
+  font-style: italic;
+  color: #666;
+  margin-bottom: 1.2em;
+}
+
+.epigraph {
+  max-width: 36em;
+  margin: 0 auto;
+  font-style: italic;
+  color: #555;
+  font-size: 0.95em;
+  line-height: 1.6;
+}
+.epigraph .attribution {
+  font-style: normal;
+  color: #888;
+  margin-top: 0.3em;
+}
+
+nav.toc {
+  display: flex;
+  justify-content: center;
+  gap: 2em;
+  flex-wrap: wrap;
+  margin-bottom: 2.5em;
+  padding-bottom: 1.5em;
+  border-bottom: 1px solid #eee;
+}
+nav.toc a {
+  color: #555;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-family: 'SF Mono', 'Fira Code', Consolas, monospace;
+  font-size: 0.78em;
+}
+nav.toc a:hover { color: #2d6a8a; }
+
+section { margin-bottom: 3em; }
+
+h2 {
+  font-size: 1.4em;
+  font-weight: 700;
+  color: #1a1a1a;
+  margin-bottom: 0.8em;
+  border-bottom: 1px solid #eee;
+  padding-bottom: 0.3em;
+}
+
+h3 {
+  font-size: 1.1em;
+  font-weight: 700;
+  color: #333;
+  margin-top: 1.5em;
+  margin-bottom: 0.5em;
+}
+
+p { margin-bottom: 1em; }
+
+blockquote {
+  border-left: 3px solid #ccc;
+  padding-left: 1.2em;
+  margin: 1.5em 0;
+  color: #555;
+  font-style: italic;
+}
+blockquote .attribution {
+  font-style: normal;
+  color: #888;
+  display: block;
+  margin-top: 0.3em;
+}
+
+/* === Interactive Demo === */
+.demo-container {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.5em;
+  margin: 1.5em 0;
+}
+
+@media (max-width: 800px) {
+  .demo-container {
+    grid-template-columns: 1fr;
+  }
+}
+
+.demo-panel {
+  background: #fff;
+  border: 1px solid #e0e0dd;
+  border-radius: 6px;
+  padding: 1.2em;
+}
+
+.demo-panel h3 {
+  margin-top: 0;
+  font-size: 1em;
+  color: #2d6a8a;
+  border-bottom: 1px solid #eee;
+  padding-bottom: 0.4em;
+  margin-bottom: 0.8em;
+}
+
+canvas {
+  display: block;
+  margin: 0 auto;
+  border-radius: 4px;
+}
+
+#bloch-canvas {
+  background: #1a1a2e;
+  cursor: grab;
+}
+
+#bloch-canvas:active {
+  cursor: grabbing;
+}
+
+#signal-canvas {
+  background: #1a1a2e;
+}
+
+/* === Controls === */
+.controls {
+  margin: 1.5em 0;
+  background: #fff;
+  border: 1px solid #e0e0dd;
+  border-radius: 6px;
+  padding: 1.2em 1.5em;
+}
+
+.control-row {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(14em, 1fr));
+  gap: 1em 2em;
+  margin-bottom: 0.5em;
+}
+
+.control-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2em;
+}
+
+.control-group label {
+  font-size: 0.82em;
+  font-family: 'SF Mono', 'Fira Code', Consolas, monospace;
+  color: #555;
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+}
+
+.control-group label .val {
+  color: #2d8a4e;
+  font-weight: 600;
+}
+
+input[type="range"] {
+  width: 100%;
+  height: 6px;
+  -webkit-appearance: none;
+  appearance: none;
+  background: #e0e0dd;
+  border-radius: 3px;
+  outline: none;
+}
+
+input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: #2d8a4e;
+  cursor: pointer;
+}
+
+input[type="range"]::-moz-range-thumb {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: #2d8a4e;
+  cursor: pointer;
+  border: none;
+}
+
+.button-row {
+  display: flex;
+  gap: 0.8em;
+  margin-top: 1em;
+  flex-wrap: wrap;
+}
+
+button {
+  font-family: 'SF Mono', 'Fira Code', Consolas, monospace;
+  font-size: 0.82em;
+  padding: 0.5em 1.2em;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  background: #fafaf8;
+  color: #333;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+button:hover {
+  border-color: #2d8a4e;
+  color: #2d8a4e;
+}
+
+button.active {
+  background: #2d8a4e;
+  color: white;
+  border-color: #2d8a4e;
+}
+
+/* === Readout === */
+.readout {
+  display: flex;
+  gap: 1.5em;
+  flex-wrap: wrap;
+  justify-content: center;
+  padding: 0.8em 1em;
+  background: #f0f0ee;
+  border-radius: 4px;
+  border-left: 4px solid #2d8a4e;
+  margin: 1em 0;
+  font-family: 'SF Mono', 'Fira Code', Consolas, monospace;
+  font-size: 0.82em;
+}
+
+.readout-item {
+  display: flex;
+  gap: 0.4em;
+  align-items: baseline;
+}
+
+.readout-label { color: #888; }
+.readout-value { color: #2d8a4e; font-weight: 600; }
+
+/* === Equation === */
+.equation {
+  text-align: center;
+  margin: 1.5em 0;
+  font-size: 1.05em;
+  color: #1a1a1a;
+  padding: 1em;
+  background: #f7f5f0;
+  border: 1px solid #e0ddd5;
+  border-radius: 4px;
+}
+
+/* === Code Preview === */
+.code-columns {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(16em, 1fr));
+  gap: 1em;
+  margin: 1.5em 0;
+}
+.code-block {
+  background: #1e1e1e;
+  color: #d4d4d4;
+  border-radius: 4px;
+  padding: 1em 1.2em;
+  font-family: 'SF Mono', 'Fira Code', Consolas, monospace;
+  font-size: 0.76em;
+  line-height: 1.6;
+  overflow-x: auto;
+}
+.code-block .lang-label {
+  display: block;
+  color: #888;
+  font-size: 0.85em;
+  margin-bottom: 0.5em;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+}
+.code-block .kw { color: #569cd6; }
+.code-block .fn { color: #dcdcaa; }
+.code-block .ty { color: #4ec9b0; }
+.code-block .cm { color: #6a9955; }
+.code-block .op { color: #d4d4d4; }
+.code-block .nb { color: #b5cea8; }
+
+/* === App cards === */
+.app-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(22em, 1fr));
+  gap: 1.5em;
+  margin: 1.5em 0;
+}
+.app-card {
+  border: 1px solid #e0e0dd;
+  border-radius: 4px;
+  padding: 1.3em 1.5em;
+  background: #fff;
+}
+.app-card h3 {
+  margin-top: 0;
+  font-size: 1.05em;
+  color: #2d6a8a;
+}
+.app-card p {
+  font-size: 0.92em;
+  color: #444;
+  margin-bottom: 0;
+}
+
+/* === Repo Links === */
+.repo-links {
+  display: flex;
+  gap: 1.5em;
+  flex-wrap: wrap;
+  margin: 1.5em 0;
+}
+.repo-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5em;
+  padding: 0.6em 1.2em;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  font-family: 'SF Mono', 'Fira Code', Consolas, monospace;
+  font-size: 0.82em;
+  color: #333;
+  transition: border-color 0.15s;
+}
+.repo-link:hover {
+  border-color: #2d6a8a;
+  text-decoration: none;
+}
+
+/* === Stats === */
+.stats-banner {
+  display: flex;
+  gap: 2em;
+  justify-content: center;
+  flex-wrap: wrap;
+  padding: 1.2em 1.5em;
+  background: #f0f0ee;
+  border-radius: 4px;
+  border-left: 4px solid #2d8a4e;
+  margin: 2em 0;
+}
+.stat-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-width: 7em;
+}
+.stat-number {
+  font-family: 'SF Mono', 'Fira Code', Consolas, monospace;
+  font-size: 1.5em;
+  font-weight: 700;
+  color: #2d8a4e;
+}
+.stat-label {
+  font-size: 0.72em;
+  color: #888;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-top: 0.1em;
+}
+
+/* === Figure === */
+figure.schematic {
+  margin: 2em 0;
+  text-align: center;
+}
+figure.schematic svg {
+  max-width: 100%;
+  height: auto;
+}
+figure.schematic figcaption {
+  font-size: 0.85em;
+  color: #777;
+  margin-top: 0.6em;
+  font-style: italic;
+}
+
+footer {
+  border-top: 1px solid #ddd;
+  padding-top: 2em;
+  margin-top: 4em;
+  color: #888;
+  font-size: 0.85em;
+  text-align: center;
+}
+footer a { color: #888; }
+footer a:hover { color: #2d6a8a; }
+
+@media (max-width: 600px) {
+  body { padding: 1em; font-size: 16px; }
+  h1.site-title { font-size: 1.6em; }
+  .stats-banner { flex-direction: column; align-items: center; }
+  .app-grid { grid-template-columns: 1fr; }
+  .code-columns { grid-template-columns: 1fr; }
+  nav.toc { flex-direction: column; align-items: center; gap: 0.8em; }
+}
+</style>
+</head>
+<body>
+
+<header>
+  <h1 class="site-title">MāyāPramāṇa</h1>
+  <div class="site-subtitle">Universal Quantum Sensor Controller</div>
+  <div class="epigraph">
+    What I cannot create, I do not understand.
+    <div class="attribution">— Richard Feynman, last blackboard, 1988</div>
+  </div>
+</header>
+
+<nav class="toc">
+  <a href="#demo">Live Demo</a>
+  <a href="#vision">Vision</a>
+  <a href="#applications">Applications</a>
+  <a href="#code">Code</a>
+  <a href="#join">Join</a>
+</nav>
+
+<!-- ============================================================ -->
+<!--  INTERACTIVE DEMO                                             -->
+<!-- ============================================================ -->
+<section id="demo">
+  <h2>Bloch Dynamics — Interactive Digital Twin</h2>
+
+  <p>This is the core of every atomic magnetometer, NMR system, and
+  quantum sensor: a spin precessing in a magnetic field, decaying
+  through relaxation, recovering through pumping. Drag the sphere to
+  rotate the view. Adjust the sliders to change the physics.</p>
+
+  <div class="demo-container">
+    <div class="demo-panel">
+      <h3>Bloch Sphere</h3>
+      <canvas id="bloch-canvas" width="400" height="400"></canvas>
+    </div>
+    <div class="demo-panel">
+      <h3>Magnetometer Signal M<sub>x</sub>(t)</h3>
+      <canvas id="signal-canvas" width="400" height="400"></canvas>
+    </div>
+  </div>
+
+  <div class="readout" id="readout">
+    <div class="readout-item">
+      <span class="readout-label">M<sub>x</sub> =</span>
+      <span class="readout-value" id="r-mx">0.000</span>
+    </div>
+    <div class="readout-item">
+      <span class="readout-label">M<sub>y</sub> =</span>
+      <span class="readout-value" id="r-my">0.000</span>
+    </div>
+    <div class="readout-item">
+      <span class="readout-label">M<sub>z</sub> =</span>
+      <span class="readout-value" id="r-mz">0.000</span>
+    </div>
+    <div class="readout-item">
+      <span class="readout-label">|M| =</span>
+      <span class="readout-value" id="r-norm">0.000</span>
+    </div>
+    <div class="readout-item">
+      <span class="readout-label">f<sub>L</sub> =</span>
+      <span class="readout-value" id="r-larmor">0 Hz</span>
+    </div>
+  </div>
+
+  <div class="controls">
+    <div class="control-row">
+      <div class="control-group">
+        <label>B field (uT) <span class="val" id="v-field">50.0</span></label>
+        <input type="range" id="s-field" min="1" max="200" value="50" step="1">
+      </div>
+      <div class="control-group">
+        <label>T<sub>2</sub> (ms) <span class="val" id="v-t2">10.0</span></label>
+        <input type="range" id="s-t2" min="1" max="100" value="10" step="1">
+      </div>
+      <div class="control-group">
+        <label>T<sub>1</sub> (ms) <span class="val" id="v-t1">100.0</span></label>
+        <input type="range" id="s-t1" min="10" max="500" value="100" step="10">
+      </div>
+      <div class="control-group">
+        <label>M<sub>0</sub> (pumping) <span class="val" id="v-m0">0.80</span></label>
+        <input type="range" id="s-m0" min="0" max="100" value="80" step="1">
+      </div>
+    </div>
+    <div class="button-row">
+      <button id="btn-tip90">Tip 90 (pump + tip)</button>
+      <button id="btn-fid">Free Induction Decay</button>
+      <button id="btn-precess">Pure Precession</button>
+      <button id="btn-relax">Relaxation Only</button>
+      <button id="btn-reset">Reset</button>
+    </div>
+  </div>
+
+  <div class="equation">
+    d<strong>M</strong>/dt = &gamma; (<strong>M</strong> &times; <strong>B</strong>)
+    &minus; (M<sub>x</sub>/T<sub>2</sub>, &thinsp;M<sub>y</sub>/T<sub>2</sub>,
+    &thinsp;(M<sub>z</sub> &minus; M<sub>0</sub>)/T<sub>1</sub>)
+  </div>
+</section>
+
+<!-- ============================================================ -->
+<!--  VISION                                                       -->
+<!-- ============================================================ -->
+<section id="vision">
+  <h2>What This Is</h2>
+
+  <p>Every quantum sensor lab builds its controller from scratch. LabVIEW
+  here, a custom FPGA there, Python scripts held together by grad student
+  labour. The knowledge is trapped in the wiring, illegible, unreproducible.</p>
+
+  <p>MāyāPramāṇa proposes a shared <em>grammar</em> for the epistemology
+  of measurement: digital twins of quantum sensors, built from first
+  principles, implemented in three languages, verified with tests.</p>
+
+  <div class="stats-banner">
+    <div class="stat-item">
+      <div class="stat-number">3</div>
+      <div class="stat-label">Languages</div>
+    </div>
+    <div class="stat-item">
+      <div class="stat-number">1</div>
+      <div class="stat-label">Physics</div>
+    </div>
+    <div class="stat-item">
+      <div class="stat-number">Pure</div>
+      <div class="stat-label">Core</div>
+    </div>
+    <div class="stat-item">
+      <div class="stat-number">Open</div>
+      <div class="stat-label">Source</div>
+    </div>
+  </div>
+
+  <!-- sensor pipeline SVG from wireframe -->
+  <figure class="schematic">
+    <svg viewBox="0 0 760 140" xmlns="http://www.w3.org/2000/svg" style="max-width: 48em;">
+      <g font-family="Georgia, serif" font-size="12" text-anchor="middle">
+        <rect x="10" y="30" width="80" height="40" rx="4" fill="#f7f5f0" stroke="#999" stroke-width="1"/>
+        <text x="50" y="55" fill="#333">Photons</text>
+        <rect x="120" y="30" width="80" height="40" rx="4" fill="#f7f5f0" stroke="#999" stroke-width="1"/>
+        <text x="160" y="55" fill="#333">Detector</text>
+        <rect x="230" y="30" width="80" height="40" rx="4" fill="#f7f5f0" stroke="#999" stroke-width="1"/>
+        <text x="270" y="55" fill="#333">Amplify</text>
+        <rect x="340" y="30" width="90" height="40" rx="4" fill="#f7f5f0" stroke="#999" stroke-width="1"/>
+        <text x="385" y="55" fill="#333">Demodulate</text>
+        <rect x="460" y="30" width="80" height="40" rx="4" fill="#e8f0e8" stroke="#2d8a4e" stroke-width="1.5"/>
+        <text x="500" y="55" fill="#2d6a4e" font-weight="600">Estimate</text>
+        <rect x="570" y="30" width="70" height="40" rx="4" fill="#e8f0e8" stroke="#2d8a4e" stroke-width="1.5"/>
+        <text x="605" y="55" fill="#2d6a4e" font-weight="600">Decide</text>
+        <rect x="670" y="30" width="76" height="40" rx="4" fill="#f7f5f0" stroke="#999" stroke-width="1"/>
+        <text x="708" y="55" fill="#333">Actuate</text>
+      </g>
+      <g stroke="#888" stroke-width="1.2" fill="none" marker-end="url(#ah)">
+        <line x1="90" y1="50" x2="118" y2="50"/>
+        <line x1="200" y1="50" x2="228" y2="50"/>
+        <line x1="310" y1="50" x2="338" y2="50"/>
+        <line x1="430" y1="50" x2="458" y2="50"/>
+        <line x1="540" y1="50" x2="568" y2="50"/>
+        <line x1="640" y1="50" x2="668" y2="50"/>
+      </g>
+      <path d="M 708 70 L 708 105 Q 708 115 698 115 L 62 115 Q 50 115 50 105 L 50 72"
+            stroke="#2d8a4e" stroke-width="1.2" fill="none" stroke-dasharray="5,3"
+            marker-end="url(#ahg)"/>
+      <text x="380" y="128" font-family="Georgia, serif" font-size="11"
+            fill="#2d8a4e" text-anchor="middle" font-style="italic">feedback loop</text>
+      <defs>
+        <marker id="ah" markerWidth="7" markerHeight="5" refX="6" refY="2.5" orient="auto">
+          <polygon points="0 0, 7 2.5, 0 5" fill="#888"/>
+        </marker>
+        <marker id="ahg" markerWidth="7" markerHeight="5" refX="6" refY="2.5" orient="auto">
+          <polygon points="0 0, 7 2.5, 0 5" fill="#2d8a4e"/>
+        </marker>
+      </defs>
+    </svg>
+    <figcaption>The quantum sensor pipeline: from raw photons through signal processing
+    to calibrated inference, with feedback closing the loop.</figcaption>
+  </figure>
+</section>
+
+<!-- ============================================================ -->
+<!--  APPLICATIONS                                                 -->
+<!-- ============================================================ -->
+<section id="applications">
+  <h2>Applications</h2>
+
+  <p>The same Bloch equations govern atomic magnetometers, NMR, MRI,
+  and MEG. The same Fisher information bounds their sensitivity.
+  The same Kalman filter tracks their signals. A universal controller
+  is not an abstraction — it is a recognition that the physics is
+  already shared.</p>
+
+  <div class="app-grid">
+    <div class="app-card">
+      <h3>Wearable MEG</h3>
+      <p>Optically pumped magnetometers replacing cryogenic SQUIDs
+      for brain imaging. Room temperature. Subjects can move. The
+      controller grammar is the same as for a lab magnetometer.</p>
+    </div>
+    <div class="app-card">
+      <h3>NV-Diamond Sensors</h3>
+      <p>Nanoscale magnetometry using nitrogen-vacancy centres in
+      diamond. Single-neuron resolution demonstrated. Different
+      physics, same controller structure.</p>
+    </div>
+    <div class="app-card">
+      <h3>Ultra-Low-Field MRI</h3>
+      <p>Portable brain imaging at microtesla fields. Quantum
+      magnetometer arrays instead of superconducting magnets.
+      Same Bloch equations, structured sample.</p>
+    </div>
+    <div class="app-card">
+      <h3>Magnetocardiography</h3>
+      <p>The heart's magnetic field measured non-invasively, through
+      clothing. Portable MCG for point-of-care cardiac screening.
+      A thousand times stronger than the brain — easier to start with.</p>
+    </div>
+    <div class="app-card">
+      <h3>Quantum Optics Lab</h3>
+      <p>Where it begins: atomic magnetometers, gravimeters, optical
+      clocks. Each controller built from scratch, every time.
+      The grammar that emerges here propagates everywhere.</p>
+    </div>
+    <div class="app-card">
+      <h3>Point-of-Care Diagnostics</h3>
+      <p>Chip-scale NMR for blood chemistry. Bedside stroke
+      detection. The bottleneck is not the sensor hardware — it is
+      the control and calibration software.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================ -->
+<!--  CODE                                                         -->
+<!-- ============================================================ -->
+<section id="code">
+  <h2>Three Languages, One Physics</h2>
+
+  <p>Every lesson implements the same physics in Python (exploration),
+  Haskell (specification), and C++ (deployment). All three must agree.
+  The code is tangled from literate org documents — the document is
+  the source of truth.</p>
+
+  <div class="code-columns">
+    <div class="code-block">
+      <span class="lang-label">Python</span>
+<span class="kw">def</span> <span class="fn">bloch_derivative</span>(state, field, params):
+    m = state.<span class="fn">as_array</span>()
+    <span class="cm"># Precession: gamma * M x B</span>
+    prec = params.gamma * np.<span class="fn">cross</span>(m, field)
+    <span class="cm"># Relaxation</span>
+    relax = np.<span class="fn">array</span>([
+        -m[<span class="nb">0</span>] / params.t2,
+        -m[<span class="nb">1</span>] / params.t2,
+        -(m[<span class="nb">2</span>] - params.m0) / params.t1
+    ])
+    <span class="kw">return</span> prec + relax
+    </div>
+    <div class="code-block">
+      <span class="lang-label">Haskell</span>
+<span class="fn">blochDerivative</span> :: <span class="ty">BlochParams</span>
+               -> <span class="ty">Field</span>
+               -> <span class="ty">BlochState</span>
+               -> (<span class="ty">Double</span>,<span class="ty">Double</span>,<span class="ty">Double</span>)
+<span class="fn">blochDerivative</span> params field state =
+  <span class="kw">let</span>
+    (px,py,pz) = <span class="fn">cross</span> (mx',my',mz')
+                       (bx,by,bz)
+    precX = gamma params * px
+    relX  = -mx' / t2 params
+  <span class="kw">in</span> (precX+relX, precY+relY, precZ+relZ)
+    </div>
+    <div class="code-block">
+      <span class="lang-label">C++</span>
+<span class="kw">inline auto</span> <span class="fn">bloch_derivative</span>(
+    <span class="kw">const</span> <span class="ty">BlochState</span>&amp; s,
+    <span class="kw">const</span> <span class="ty">Field</span>&amp; B,
+    <span class="kw">const</span> <span class="ty">BlochParams</span>&amp; p)
+  -> <span class="ty">BlochState</span>
+{
+    <span class="ty">double</span> px = s.my*B[<span class="nb">2</span>] - s.mz*B[<span class="nb">1</span>];
+    <span class="kw">return</span> {
+      .mx = p.gamma*px - s.mx/p.t2,
+      .my = p.gamma*py - s.my/p.t2,
+      .mz = p.gamma*pz
+            - (s.mz-p.m0)/p.t1
+    };
+}
+    </div>
+  </div>
+
+  <div class="repo-links">
+    <a class="repo-link" href="https://github.com/mayalucia/mayapramana">mayapramana — quantum sensor twins</a>
+    <a class="repo-link" href="https://github.com/mayalucia/bravli">bravli — neuroscience toolkit</a>
+    <a class="repo-link" href="https://github.com/mayalucia/mayalucia">mayalucia — the organisation</a>
+  </div>
+</section>
+
+<!-- ============================================================ -->
+<!--  JOIN                                                         -->
+<!-- ============================================================ -->
+<section id="join">
+  <h2>Join</h2>
+
+  <blockquote>
+    Slowly, slowly, O my mind — slowly everything happens.
+    The gardener may pour a hundred buckets, but fruit comes only
+    in its season.
+    <span class="attribution">— Kabir</span>
+  </blockquote>
+
+  <p>Clone the repo. Read the manifesto. Run the tests. Tell us where
+  the physics is wrong.</p>
+
+  <div class="repo-links">
+    <a class="repo-link" href="https://github.com/mayalucia/mayapramana">github.com/mayalucia/mayapramana</a>
+    <a class="repo-link" href="https://github.com/mayalucia">github.com/mayalucia</a>
+  </div>
+</section>
+
+<footer>
+  <p>Built from a basement, for laboratories and clinics. February 2026.</p>
+  <p style="margin-top: 0.5em;">
+    <a href="https://github.com/mayalucia">MāyāLucIA</a> &middot;
+    <a href="https://github.com/mayalucia/mayapramana">Repository</a> &middot;
+    <a href="https://github.com/mayalucia/mayapramana/blob/main/manifesto.org">Manifesto</a>
+  </p>
+</footer>
+
+<!-- ============================================================ -->
+<!--  SIMULATION ENGINE                                            -->
+<!-- ============================================================ -->
+<script>
+"use strict";
+
+// === Physics ===
+// Bloch equations: dM/dt = gamma * (M x B) - relaxation
+// We simulate at a scaled frequency for visual clarity.
+// Real Rb-87: gamma ~ 2pi * 3.5 GHz/T, Larmor at 50uT ~ 175 kHz
+// We scale to visual frequencies: gamma_vis chosen so f_L ~ a few Hz on screen
+
+const state = {
+  mx: 0, my: 0, mz: 1, // Bloch vector
+  time: 0,
+  signalHistory: [], // ring buffer of {t, mx} for signal plot
+  maxHistory: 800,
+};
+
+// Parameters (user-adjustable)
+const params = {
+  bField: 50.0,   // uT
+  t1: 0.100,      // s
+  t2: 0.010,      // s
+  m0: 0.8,        // equilibrium magnetisation from pumping
+  // Visual scaling: we want ~2-5 rotations per second on screen
+  // Real Larmor at 50uT: ~175 kHz. We scale by 1/35000 for visual
+  gammaScaled: 2 * Math.PI * 5.0 / 50.0, // gives 5 Hz at 50 uT
+};
+
+function blochDerivative(mx, my, mz, bx, by, bz, p) {
+  const g = p.gammaScaled;
+  // Precession: gamma * M x B
+  const px = g * (my * bz - mz * by);
+  const py = g * (mz * bx - mx * bz);
+  const pz = g * (mx * by - my * bx);
+  // Relaxation
+  const rx = -mx / p.t2;
+  const ry = -my / p.t2;
+  const rz = -(mz - p.m0) / p.t1;
+  return [px + rx, py + ry, pz + rz];
+}
+
+function rk4Step(mx, my, mz, bx, by, bz, p, dt) {
+  function f(x, y, z) { return blochDerivative(x, y, z, bx, by, bz, p); }
+  const k1 = f(mx, my, mz);
+  const k2 = f(mx + 0.5*dt*k1[0], my + 0.5*dt*k1[1], mz + 0.5*dt*k1[2]);
+  const k3 = f(mx + 0.5*dt*k2[0], my + 0.5*dt*k2[1], mz + 0.5*dt*k2[2]);
+  const k4 = f(mx + dt*k3[0], my + dt*k3[1], mz + dt*k3[2]);
+  return [
+    mx + (dt/6) * (k1[0] + 2*k2[0] + 2*k3[0] + k4[0]),
+    my + (dt/6) * (k1[1] + 2*k2[1] + 2*k3[1] + k4[1]),
+    mz + (dt/6) * (k1[2] + 2*k2[2] + 2*k3[2] + k4[2]),
+  ];
+}
+
+// === 3D Bloch Sphere Rendering (Canvas 2D projection) ===
+const blochCanvas = document.getElementById('bloch-canvas');
+const bCtx = blochCanvas.getContext('2d');
+
+// View rotation (draggable)
+let viewTheta = 0.4; // polar angle from z
+let viewPhi = -0.6;  // azimuthal angle
+let dragging = false;
+let dragLastX = 0, dragLastY = 0;
+
+blochCanvas.addEventListener('mousedown', e => {
+  dragging = true;
+  dragLastX = e.clientX;
+  dragLastY = e.clientY;
+});
+window.addEventListener('mouseup', () => { dragging = false; });
+window.addEventListener('mousemove', e => {
+  if (!dragging) return;
+  const dx = e.clientX - dragLastX;
+  const dy = e.clientY - dragLastY;
+  viewPhi += dx * 0.008;
+  viewTheta = Math.max(-Math.PI/2, Math.min(Math.PI/2, viewTheta - dy * 0.008));
+  dragLastX = e.clientX;
+  dragLastY = e.clientY;
+});
+
+// Touch support
+blochCanvas.addEventListener('touchstart', e => {
+  if (e.touches.length === 1) {
+    dragging = true;
+    dragLastX = e.touches[0].clientX;
+    dragLastY = e.touches[0].clientY;
+    e.preventDefault();
+  }
+});
+window.addEventListener('touchend', () => { dragging = false; });
+window.addEventListener('touchmove', e => {
+  if (!dragging || e.touches.length !== 1) return;
+  const dx = e.touches[0].clientX - dragLastX;
+  const dy = e.touches[0].clientY - dragLastY;
+  viewPhi += dx * 0.008;
+  viewTheta = Math.max(-Math.PI/2, Math.min(Math.PI/2, viewTheta - dy * 0.008));
+  dragLastX = e.touches[0].clientX;
+  dragLastY = e.touches[0].clientY;
+});
+
+function project3D(x, y, z) {
+  // Rotate by viewPhi around z, then viewTheta tilt
+  const cp = Math.cos(viewPhi), sp = Math.sin(viewPhi);
+  const ct = Math.cos(viewTheta), st = Math.sin(viewTheta);
+  // Rotation: first around Z by phi, then around X by theta
+  const x1 = x * cp - y * sp;
+  const y1 = x * sp + y * cp;
+  const z1 = z;
+  const x2 = x1;
+  const y2 = y1 * ct - z1 * st;
+  const z2 = y1 * st + z1 * ct;
+  // Orthographic projection
+  const scale = 140;
+  const cx = blochCanvas.width / 2;
+  const cy = blochCanvas.height / 2;
+  return { sx: cx + x2 * scale, sy: cy - z2 * scale, depth: y2 };
+}
+
+function drawBlochSphere() {
+  const w = blochCanvas.width, h = blochCanvas.height;
+  bCtx.clearRect(0, 0, w, h);
+
+  // Background
+  bCtx.fillStyle = '#1a1a2e';
+  bCtx.fillRect(0, 0, w, h);
+
+  const cx = w/2, cy = h/2, R = 140;
+
+  // Sphere outline (circle)
+  bCtx.beginPath();
+  bCtx.arc(cx, cy, R, 0, 2*Math.PI);
+  bCtx.strokeStyle = 'rgba(100,100,140,0.3)';
+  bCtx.lineWidth = 1;
+  bCtx.stroke();
+
+  // Draw wireframe circles for equator and meridians
+  function drawGreatCircle(normalX, normalY, normalZ, color, dashed) {
+    // Project points on a great circle perpendicular to the given normal
+    const pts = [];
+    // Find two orthogonal vectors in the plane
+    let ux, uy, uz, vx, vy, vz;
+    if (Math.abs(normalZ) < 0.9) {
+      // cross with z
+      ux = -normalY; uy = normalX; uz = 0;
+      const len = Math.sqrt(ux*ux + uy*uy);
+      ux /= len; uy /= len;
+    } else {
+      ux = 1; uy = 0; uz = 0;
+    }
+    // v = normal x u
+    vx = normalY * uz - normalZ * uy;
+    vy = normalZ * ux - normalX * uz;
+    vz = normalX * uy - normalY * ux;
+
+    for (let i = 0; i <= 64; i++) {
+      const a = (i / 64) * 2 * Math.PI;
+      const px = Math.cos(a) * ux + Math.sin(a) * vx;
+      const py = Math.cos(a) * uy + Math.sin(a) * vy;
+      const pz = Math.cos(a) * uz + Math.sin(a) * vz;
+      pts.push(project3D(px, py, pz));
+    }
+
+    bCtx.beginPath();
+    if (dashed) bCtx.setLineDash([4, 4]);
+    else bCtx.setLineDash([]);
+    for (let i = 0; i < pts.length; i++) {
+      const p = pts[i];
+      // Fade based on depth
+      if (i === 0) bCtx.moveTo(p.sx, p.sy);
+      else bCtx.lineTo(p.sx, p.sy);
+    }
+    bCtx.strokeStyle = color;
+    bCtx.lineWidth = 0.8;
+    bCtx.stroke();
+    bCtx.setLineDash([]);
+  }
+
+  // Equator (normal = z)
+  drawGreatCircle(0, 0, 1, 'rgba(100,100,140,0.25)', true);
+  // Meridian xz (normal = y)
+  drawGreatCircle(0, 1, 0, 'rgba(100,100,140,0.15)', true);
+  // Meridian yz (normal = x)
+  drawGreatCircle(1, 0, 0, 'rgba(100,100,140,0.15)', true);
+
+  // Axes
+  function drawAxis(x, y, z, label, color) {
+    const p0 = project3D(0, 0, 0);
+    const p1 = project3D(x * 1.3, y * 1.3, z * 1.3);
+    const pn = project3D(-x * 1.3, -y * 1.3, -z * 1.3);
+    bCtx.beginPath();
+    bCtx.moveTo(pn.sx, pn.sy);
+    bCtx.lineTo(p1.sx, p1.sy);
+    bCtx.strokeStyle = color;
+    bCtx.lineWidth = 0.8;
+    bCtx.stroke();
+    // Label
+    const pl = project3D(x * 1.45, y * 1.45, z * 1.45);
+    bCtx.font = 'italic 14px Georgia, serif';
+    bCtx.fillStyle = color;
+    bCtx.textAlign = 'center';
+    bCtx.textBaseline = 'middle';
+    bCtx.fillText(label, pl.sx, pl.sy);
+  }
+
+  drawAxis(1, 0, 0, 'x', 'rgba(180,180,200,0.5)');
+  drawAxis(0, 1, 0, 'y', 'rgba(180,180,200,0.5)');
+  drawAxis(0, 0, 1, 'z', 'rgba(180,180,200,0.7)');
+
+  // |0> and |1> labels
+  const pUp = project3D(0, 0, 1.55);
+  const pDown = project3D(0, 0, -1.55);
+  bCtx.font = '12px "SF Mono", "Fira Code", Consolas, monospace';
+  bCtx.fillStyle = '#2d8a4e';
+  bCtx.fillText('|0\u27E9', pUp.sx, pUp.sy);
+  bCtx.fillStyle = '#c94040';
+  bCtx.fillText('|1\u27E9', pDown.sx, pDown.sy);
+
+  // B field arrow (along z, outside sphere)
+  const bBase = project3D(1.6, 0, -0.3);
+  const bTip = project3D(1.6, 0, 0.6);
+  bCtx.beginPath();
+  bCtx.moveTo(bBase.sx, bBase.sy);
+  bCtx.lineTo(bTip.sx, bTip.sy);
+  bCtx.strokeStyle = '#888';
+  bCtx.lineWidth = 2;
+  bCtx.stroke();
+  // arrowhead
+  const bLabel = project3D(1.6, 0, 0.75);
+  bCtx.font = 'bold 14px Georgia, serif';
+  bCtx.fillStyle = '#aaa';
+  bCtx.fillText('B', bLabel.sx, bLabel.sy);
+
+  // Trail (recent positions)
+  if (state.signalHistory.length > 2) {
+    bCtx.beginPath();
+    const trail = state.signalHistory;
+    const start = Math.max(0, trail.length - 200);
+    for (let i = start; i < trail.length; i++) {
+      const h = trail[i];
+      const p = project3D(h.mx, h.my, h.mz);
+      const alpha = (i - start) / (trail.length - start) * 0.5;
+      if (i === start) {
+        bCtx.moveTo(p.sx, p.sy);
+      } else {
+        bCtx.lineTo(p.sx, p.sy);
+      }
+    }
+    bCtx.strokeStyle = 'rgba(45,138,78,0.35)';
+    bCtx.lineWidth = 1.5;
+    bCtx.stroke();
+  }
+
+  // Bloch vector
+  const p0 = project3D(0, 0, 0);
+  const pM = project3D(state.mx, state.my, state.mz);
+  bCtx.beginPath();
+  bCtx.moveTo(p0.sx, p0.sy);
+  bCtx.lineTo(pM.sx, pM.sy);
+  bCtx.strokeStyle = '#4ec9b0';
+  bCtx.lineWidth = 2.5;
+  bCtx.stroke();
+
+  // Tip dot
+  bCtx.beginPath();
+  bCtx.arc(pM.sx, pM.sy, 5, 0, 2*Math.PI);
+  bCtx.fillStyle = '#4ec9b0';
+  bCtx.fill();
+  bCtx.strokeStyle = '#fff';
+  bCtx.lineWidth = 1;
+  bCtx.stroke();
+
+  // Projection shadow on equator
+  const norm_xy = Math.sqrt(state.mx*state.mx + state.my*state.my);
+  if (norm_xy > 0.01) {
+    const pProj = project3D(state.mx, state.my, 0);
+    bCtx.beginPath();
+    bCtx.setLineDash([3, 3]);
+    bCtx.moveTo(pM.sx, pM.sy);
+    bCtx.lineTo(pProj.sx, pProj.sy);
+    bCtx.lineTo(p0.sx, p0.sy);
+    bCtx.strokeStyle = 'rgba(78,201,176,0.3)';
+    bCtx.lineWidth = 1;
+    bCtx.stroke();
+    bCtx.setLineDash([]);
+
+    bCtx.beginPath();
+    bCtx.arc(pProj.sx, pProj.sy, 3, 0, 2*Math.PI);
+    bCtx.fillStyle = 'rgba(78,201,176,0.4)';
+    bCtx.fill();
+  }
+
+  // Label: M
+  bCtx.font = 'bold 15px Georgia, serif';
+  bCtx.fillStyle = '#4ec9b0';
+  const mLabelOffset = 12;
+  const dx = pM.sx - p0.sx;
+  const dy = pM.sy - p0.sy;
+  const dl = Math.sqrt(dx*dx + dy*dy) || 1;
+  bCtx.fillText('M', pM.sx + (dx/dl)*mLabelOffset, pM.sy + (dy/dl)*mLabelOffset);
+}
+
+// === Signal Plot ===
+const sigCanvas = document.getElementById('signal-canvas');
+const sCtx = sigCanvas.getContext('2d');
+
+function drawSignalPlot() {
+  const w = sigCanvas.width, h = sigCanvas.height;
+  sCtx.clearRect(0, 0, w, h);
+
+  sCtx.fillStyle = '#1a1a2e';
+  sCtx.fillRect(0, 0, w, h);
+
+  const pad = { left: 50, right: 20, top: 30, bottom: 40 };
+  const plotW = w - pad.left - pad.right;
+  const plotH = h - pad.top - pad.bottom;
+
+  // Grid
+  sCtx.strokeStyle = 'rgba(100,100,140,0.2)';
+  sCtx.lineWidth = 0.5;
+  for (let i = 0; i <= 4; i++) {
+    const y = pad.top + (i / 4) * plotH;
+    sCtx.beginPath();
+    sCtx.moveTo(pad.left, y);
+    sCtx.lineTo(pad.left + plotW, y);
+    sCtx.stroke();
+  }
+
+  // Zero line
+  const zeroY = pad.top + plotH / 2;
+  sCtx.strokeStyle = 'rgba(100,100,140,0.4)';
+  sCtx.lineWidth = 1;
+  sCtx.beginPath();
+  sCtx.moveTo(pad.left, zeroY);
+  sCtx.lineTo(pad.left + plotW, zeroY);
+  sCtx.stroke();
+
+  // Y-axis labels
+  sCtx.font = '11px "SF Mono", "Fira Code", Consolas, monospace';
+  sCtx.fillStyle = '#888';
+  sCtx.textAlign = 'right';
+  sCtx.textBaseline = 'middle';
+  sCtx.fillText('+1', pad.left - 8, pad.top);
+  sCtx.fillText(' 0', pad.left - 8, zeroY);
+  sCtx.fillText('-1', pad.left - 8, pad.top + plotH);
+
+  // X-axis label
+  sCtx.textAlign = 'center';
+  sCtx.fillText('time', pad.left + plotW / 2, h - 8);
+
+  // Title
+  sCtx.font = '12px "SF Mono", "Fira Code", Consolas, monospace';
+  sCtx.fillStyle = '#aaa';
+  sCtx.textAlign = 'left';
+  sCtx.fillText('Magnetometer readout', pad.left, pad.top - 12);
+
+  // Signal trace
+  const hist = state.signalHistory;
+  if (hist.length < 2) return;
+
+  // Mx trace (green)
+  sCtx.beginPath();
+  for (let i = 0; i < hist.length; i++) {
+    const x = pad.left + (i / state.maxHistory) * plotW;
+    const y = zeroY - hist[i].mx * (plotH / 2);
+    if (i === 0) sCtx.moveTo(x, y);
+    else sCtx.lineTo(x, y);
+  }
+  sCtx.strokeStyle = '#4ec9b0';
+  sCtx.lineWidth = 1.5;
+  sCtx.stroke();
+
+  // My trace (dimmer)
+  sCtx.beginPath();
+  for (let i = 0; i < hist.length; i++) {
+    const x = pad.left + (i / state.maxHistory) * plotW;
+    const y = zeroY - hist[i].my * (plotH / 2);
+    if (i === 0) sCtx.moveTo(x, y);
+    else sCtx.lineTo(x, y);
+  }
+  sCtx.strokeStyle = 'rgba(86,156,214,0.5)';
+  sCtx.lineWidth = 1;
+  sCtx.stroke();
+
+  // Mz trace (gold, dashed)
+  sCtx.beginPath();
+  sCtx.setLineDash([4, 3]);
+  for (let i = 0; i < hist.length; i++) {
+    const x = pad.left + (i / state.maxHistory) * plotW;
+    const y = zeroY - hist[i].mz * (plotH / 2);
+    if (i === 0) sCtx.moveTo(x, y);
+    else sCtx.lineTo(x, y);
+  }
+  sCtx.strokeStyle = 'rgba(230,168,23,0.6)';
+  sCtx.lineWidth = 1;
+  sCtx.stroke();
+  sCtx.setLineDash([]);
+
+  // Legend
+  const legX = pad.left + plotW - 80;
+  const legY = pad.top + 10;
+  sCtx.font = '11px "SF Mono", monospace';
+
+  sCtx.fillStyle = '#4ec9b0';
+  sCtx.fillRect(legX, legY, 12, 2);
+  sCtx.fillText('Mx', legX + 16, legY + 4);
+
+  sCtx.fillStyle = 'rgba(86,156,214,0.7)';
+  sCtx.fillRect(legX, legY + 14, 12, 2);
+  sCtx.fillText('My', legX + 16, legY + 18);
+
+  sCtx.fillStyle = 'rgba(230,168,23,0.7)';
+  sCtx.fillRect(legX, legY + 28, 12, 2);
+  sCtx.fillText('Mz', legX + 16, legY + 32);
+}
+
+// === UI Controls ===
+const sliders = {
+  field: document.getElementById('s-field'),
+  t2: document.getElementById('s-t2'),
+  t1: document.getElementById('s-t1'),
+  m0: document.getElementById('s-m0'),
+};
+const displays = {
+  field: document.getElementById('v-field'),
+  t2: document.getElementById('v-t2'),
+  t1: document.getElementById('v-t1'),
+  m0: document.getElementById('v-m0'),
+};
+
+function readSliders() {
+  params.bField = parseFloat(sliders.field.value);
+  params.t2 = parseFloat(sliders.t2.value) / 1000; // ms to s
+  params.t1 = parseFloat(sliders.t1.value) / 1000;
+  params.m0 = parseFloat(sliders.m0.value) / 100;
+
+  // Scale gamma so visual frequency is pleasant
+  // Target: ~2-8 rotations per second on screen across the slider range
+  params.gammaScaled = 2 * Math.PI * 5.0 / 50.0; // 5 Hz at 50 uT, linear scaling
+
+  displays.field.textContent = params.bField.toFixed(1);
+  displays.t2.textContent = (params.t2 * 1000).toFixed(1);
+  displays.t1.textContent = (params.t1 * 1000).toFixed(1);
+  displays.m0.textContent = params.m0.toFixed(2);
+}
+
+for (const s of Object.values(sliders)) {
+  s.addEventListener('input', readSliders);
+}
+
+function updateReadout() {
+  document.getElementById('r-mx').textContent = state.mx.toFixed(3);
+  document.getElementById('r-my').textContent = state.my.toFixed(3);
+  document.getElementById('r-mz').textContent = state.mz.toFixed(3);
+  const norm = Math.sqrt(state.mx*state.mx + state.my*state.my + state.mz*state.mz);
+  document.getElementById('r-norm').textContent = norm.toFixed(3);
+  // Larmor frequency (visual)
+  const fL = params.gammaScaled * params.bField / (2 * Math.PI);
+  document.getElementById('r-larmor').textContent = fL.toFixed(1) + ' Hz (visual)';
+}
+
+// === Preset Buttons ===
+document.getElementById('btn-tip90').addEventListener('click', () => {
+  // Simulate optical pumping then 90-degree tip
+  state.mx = 1.0;
+  state.my = 0.0;
+  state.mz = 0.0;
+  state.signalHistory = [];
+});
+
+document.getElementById('btn-fid').addEventListener('click', () => {
+  // Start from pumped state along z, then tip to x
+  state.mx = 1.0;
+  state.my = 0.0;
+  state.mz = 0.0;
+  state.signalHistory = [];
+  // Use current relaxation params (FID = precession + T2 decay)
+});
+
+document.getElementById('btn-precess').addEventListener('click', () => {
+  // Pure precession: set T1, T2 very large
+  state.mx = 1.0;
+  state.my = 0.0;
+  state.mz = 0.0;
+  state.signalHistory = [];
+  sliders.t1.value = 500;
+  sliders.t2.value = 100;
+  readSliders();
+});
+
+document.getElementById('btn-relax').addEventListener('click', () => {
+  // Start from tipped state, watch it relax
+  state.mx = 0.5;
+  state.my = 0.5;
+  state.mz = 0.0;
+  state.signalHistory = [];
+  sliders.t2.value = 5;
+  sliders.t1.value = 50;
+  readSliders();
+});
+
+document.getElementById('btn-reset').addEventListener('click', () => {
+  state.mx = 0;
+  state.my = 0;
+  state.mz = 1;
+  state.signalHistory = [];
+  sliders.field.value = 50;
+  sliders.t2.value = 10;
+  sliders.t1.value = 100;
+  sliders.m0.value = 80;
+  readSliders();
+});
+
+// === Responsive canvas sizing ===
+function resizeCanvases() {
+  const containers = document.querySelectorAll('.demo-panel');
+  containers.forEach(c => {
+    const canvas = c.querySelector('canvas');
+    if (canvas) {
+      const w = c.clientWidth - 2 * 1.2 * 16; // subtract padding
+      const size = Math.max(280, Math.min(450, w));
+      canvas.width = size;
+      canvas.height = size;
+    }
+  });
+}
+
+// === Animation Loop ===
+const SIM_DT = 0.008; // simulation timestep (seconds of visual time)
+const SUBSTEPS = 4;    // RK4 substeps per frame for accuracy
+
+let lastFrameTime = null;
+let running = true;
+
+function animate(timestamp) {
+  if (!lastFrameTime) lastFrameTime = timestamp;
+  const elapsed = (timestamp - lastFrameTime) / 1000;
+  lastFrameTime = timestamp;
+
+  readSliders();
+
+  // Integrate Bloch equations
+  const bx = 0, by = 0, bz = params.bField;
+  const subDt = SIM_DT / SUBSTEPS;
+  for (let i = 0; i < SUBSTEPS; i++) {
+    const result = rk4Step(state.mx, state.my, state.mz, bx, by, bz, params, subDt);
+    state.mx = result[0];
+    state.my = result[1];
+    state.mz = result[2];
+  }
+  state.time += SIM_DT;
+
+  // Record signal history
+  state.signalHistory.push({
+    t: state.time,
+    mx: state.mx,
+    my: state.my,
+    mz: state.mz,
+  });
+  if (state.signalHistory.length > state.maxHistory) {
+    state.signalHistory.shift();
+  }
+
+  // Draw
+  drawBlochSphere();
+  drawSignalPlot();
+  updateReadout();
+
+  requestAnimationFrame(animate);
+}
+
+// === Init ===
+readSliders();
+resizeCanvases();
+window.addEventListener('resize', resizeCanvases);
+
+// Start with spin tipped to x (as if just pumped and tipped)
+state.mx = 1.0;
+state.my = 0.0;
+state.mz = 0.0;
+
+requestAnimationFrame(animate);
+</script>
+
+</body>
+</html>

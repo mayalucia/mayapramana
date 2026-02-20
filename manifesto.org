@@ -345,6 +345,78 @@ yourself, because the tests are right there next to the claims.
 
 Perhaps the Naiyāyikas were right to keep all four.
 
+* On the Fields Within Us
+
+#+begin_quote
+/Kasturi kundal base, mrig dhoonde van maahi/
+
+The musk lies within the deer's own navel, yet it searches the forest.
+--- Kabir (again, because it bears repeating)
+#+end_quote
+
+Saikat will be designing and using these tools --- hardware and
+software --- mostly for outdoor installation, for laboratory quantum
+optics, for precision measurement in controlled environments. But the
+fields these sensors measure are not confined to laboratories.
+
+We carry electromagnetic fields in our very heads. Every cortical
+column, every pyramidal neuron firing in synchrony with its
+neighbours, produces a tiny magnetic field --- a femtotesla whisper
+drowned by the Earth's field, by power lines, by the rustle of
+thermal noise. Yet it is there, and it carries information. If we
+could sense it perfectly, we would know what is happening in anyone's
+brain.
+
+This is not metaphor. This is magnetoencephalography --- MEG --- and
+it is undergoing a revolution driven by exactly the quantum sensors
+MāyāPramāṇa seeks to twin:
+
+- *Optically pumped magnetometers* (OPMs) are replacing cryogenic
+  SQUIDs for brain imaging. They operate at room temperature, can be
+  placed millimetres from the scalp, and are being built into wearable
+  helmets that allow subjects to move naturally. The physics is the
+  same alkali-vapor magnetometry that Saikat works with.
+- *NV-diamond sensors* are being explored for neural magnetic field
+  imaging at cellular resolution --- a single neuron's action
+  potential, magnetically detected.
+- *Ultra-low-field MRI*, where the sensor physics converges with
+  quantum magnetometry, promises portable brain imaging without
+  superconducting magnets.
+
+The Bloch equations in our first lesson are not only the physics of
+atomic magnetometers. They /are/ NMR. They /are/ MRI. The
+digital twin of an OPM magnetometer and the digital twin of an
+MRI pulse sequence share the same mathematical core --- precession,
+relaxation, resonance.
+
+A universal quantum sensor controller that speaks the grammar of
+feedback, estimation, and calibration is therefore not only a tool
+for quantum optics laboratories. It is a tool for:
+
+- *Neuroscience*: calibrating and controlling the next generation of
+  wearable MEG systems, modelling sensor-brain coupling, optimising
+  source localisation algorithms
+- *Cardiology*: magnetocardiography (MCG) --- the heart's magnetic
+  field, measured non-invasively, without electrodes, through clothing
+- *Regenerative medicine*: biomagnetism of wound healing, bone growth,
+  peripheral nerve activity
+- *Point-of-care diagnostics*: portable quantum sensors that bring
+  precision measurement from the laboratory to the clinic, to the
+  field, to the village
+
+The connections are not superficial. The same Fisher information that
+bounds the magnetometer's sensitivity bounds the MEG system's ability
+to localise a cortical source. The same Kalman filter that tracks a
+drifting magnetic field tracks the evolving state of a neural
+ensemble. The same noise models --- shot noise, technical noise,
+environmental interference --- apply whether the signal source is a
+rubidium cell or a human brain.
+
+There is much to learn here. And we, as pedagogues in the AI age, can
+use these deep structural parallels to teach the physics of
+measurement across domains --- from the quantum optics lab to the
+neuroscience clinic --- through the shared language of digital twins.
+
 * Closing
 
 #+begin_quote

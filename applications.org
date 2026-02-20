@@ -1,0 +1,288 @@
+#+title: Applications of a Universal Quantum Sensor Controller
+#+subtitle: From the Laboratory to the Living World
+#+author: MāyāLucIA
+#+date: February 2026
+
+#+begin_quote
+The same mathematics that describes the precession of a rubidium atom
+in a magnetic field describes the precession of a hydrogen proton in
+an MRI machine. The sensor does not know what it is measuring. The
+controller should not need to, either.
+#+end_quote
+
+* Introduction
+
+MāyāPramāṇa is designed as a universal quantum sensor controller ---
+a grammar for feedback, estimation, and calibration that applies
+across sensor types. The manifesto motivates this through atomic
+magnetometry and NV-diamond sensing. This document maps the broader
+landscape of applications, with neuroscience and medicine as the
+central thread.
+
+The argument is structural, not analogical: the same physics, the
+same mathematics, the same control problems recur across domains.
+A digital twin built for one sensor type teaches us about others ---
+Dignāga's upamāna, learning by structural comparison.
+
+* Quantum Magnetometry for Brain Imaging
+
+** The MEG Revolution
+
+Magnetoencephalography (MEG) measures the magnetic fields produced by
+neuronal currents --- primarily the synchronised postsynaptic
+potentials of tens of thousands of pyramidal neurons arranged in
+cortical columns. These fields are extraordinarily weak: 50--500
+femtotesla at the scalp, against a background of the Earth's field
+(~50 microtesla) and urban electromagnetic noise.
+
+For decades, MEG required cryogenic SQUID sensors cooled to 4 K in
+liquid helium, housed in magnetically shielded rooms costing millions.
+The sensors were fixed in a rigid helmet, requiring the subject to
+sit motionless. This limited MEG to well-funded research centres and
+excluded entire populations (young children, patients with movement
+disorders) from study.
+
+The revolution is /optically pumped magnetometers/ (OPMs). These are
+alkali-vapor magnetometers --- the same technology Saikat works with
+--- miniaturised into sensor modules that:
+
+- Operate at room temperature (or mildly heated, ~150°C cell)
+- Can be placed directly on the scalp (millimetres from the cortex,
+  vs ~3 cm standoff for cryogenic systems)
+- Allow flexible, wearable arrays that move with the subject
+- Achieve sensitivities of 10--15 fT/√Hz, approaching SQUID
+  performance
+
+The physics is identical to the atomic magnetometer digital twin in
+MāyāPramāṇa's first lessons: optical pumping creates spin
+polarisation, the magnetic field causes Larmor precession, and the
+precession is read out optically. The Bloch equations govern the
+dynamics. The same feedback loops (field zeroing, laser frequency
+locking) appear.
+
+** What a Universal Controller Offers MEG
+
+A wearable OPM-MEG system is not just a magnetometer array. It is
+a /distributed quantum sensing system/ with specific control
+challenges:
+
+- *Cross-talk compensation*: each OPM generates its own magnetic
+  field (the bias field); in a dense array, sensors perturb each
+  other. The controller must model and cancel these interactions
+  in real time.
+- *Background field cancellation*: without a heavily shielded room,
+  the Earth's field and its gradients must be actively cancelled
+  using coil arrays. This is a multi-channel feedback problem ---
+  estimate the background field, compute the cancellation currents,
+  actuate the coils, verify the residual.
+- *Motion correction*: if the subject moves, the sensor array moves
+  through the background field gradient. The controller must
+  distinguish brain signals from motion artifacts, using
+  co-registered accelerometers and reference magnetometers.
+- *Adaptive bandwidth*: different neural signals occupy different
+  frequency bands (delta: 1--4 Hz, theta: 4--8 Hz, alpha: 8--13 Hz,
+  beta: 13--30 Hz, gamma: 30--100+ Hz). The controller should
+  optimise sensitivity for the band of interest.
+
+Every one of these is a problem expressible in MāyāPramāṇa's
+grammar: state estimation (Kalman filters, particle filters), feedback
+(PID, model-predictive control), noise modelling (spectral analysis,
+Allan variance), and signal separation (beamforming, ICA as
+post-processing informed by sensor models).
+
+** Source Localisation and the Inverse Problem
+
+The /forward problem/ in MEG is well-posed: given a current dipole at
+a known location in the brain, compute the magnetic field at each
+sensor. This requires a conductor model (the head) and Maxwell's
+equations.
+
+The /inverse problem/ is ill-posed: given the sensor measurements,
+infer the source distribution. There are infinitely many source
+configurations that produce the same external field (the
+non-uniqueness of the magnetic inverse problem).
+
+The digital twin of the sensor array is a critical input to the
+inverse problem. The accuracy of source localisation depends on
+knowing exactly how each sensor responds --- its orientation, its
+gain, its frequency response, its noise floor, its cross-talk with
+neighbours. A digital twin that can be validated against bench
+measurements provides this calibration.
+
+The Fisher information matrix of the sensor array --- the same Fisher
+information that appears in the Cramér-Rao bound for a single
+magnetometer --- determines the theoretical resolution limit of the
+array for source localisation. MāyāPramāṇa's information-theoretic
+framework applies directly.
+
+* Magnetocardiography
+
+The heart produces magnetic fields roughly a thousand times stronger
+than the brain (~50 picotesla at the chest surface), making it
+accessible to less sensitive magnetometers. Magnetocardiography (MCG)
+offers:
+
+- *Non-contact measurement*: no electrodes, no skin preparation, can
+  measure through clothing
+- *Complementary information to ECG*: the magnetic field is less
+  distorted by tissue conductivity variations than the electric
+  potential, providing cleaner spatial information about cardiac
+  current sources
+- *Fetal MCG*: non-invasive assessment of fetal cardiac rhythm,
+  arrhythmia detection, where electrodes cannot reach
+
+The same OPM sensors used for MEG can be repurposed for MCG with
+different array geometry and different signal processing. The
+controller grammar is identical. The noise environment differs
+(the chest moves with respiration; the heart's field is quasi-periodic
+and can be signal-averaged), requiring adapted estimation strategies
+--- but the same Kalman filter structure, the same spectral analysis
+tools.
+
+A portable MCG system using OPMs could bring cardiac magnetic imaging
+to the point of care --- a screening tool in a general practitioner's
+office, a monitoring device in a rural clinic, a diagnostic aid where
+ECG is insufficient.
+
+* NV-Diamond Sensors: Toward Cellular Resolution
+
+Nitrogen-vacancy centres in diamond are solid-state quantum sensors
+that can operate at room temperature and --- critically --- can be
+fabricated at nanometre scales. A single NV centre is a single-spin
+magnetometer.
+
+For biomedical applications, this opens possibilities that bulk
+magnetometers cannot reach:
+
+- *Single-neuron magnetometry*: an NV-diamond chip placed against
+  neural tissue could detect the magnetic field of individual action
+  potentials (~1 nanotesla at micrometre distances). This has been
+  demonstrated in proof-of-concept with worm ganglia.
+- *Intracellular sensing*: nanodiamonds containing NV centres can be
+  introduced into living cells, sensing local magnetic fields,
+  temperature, and strain.
+- *Label-free molecular detection*: NV magnetometers can detect the
+  nuclear magnetic resonance of nanolitre sample volumes, enabling
+  chemical analysis without fluorescent labels.
+
+The physics differs from alkali-vapor sensors (solid-state spin
+Hamiltonian, optically detected magnetic resonance, different
+noise sources), but the control structure is the same: initialise
+the spin state (laser pulse), interrogate (microwave pulse sequence),
+read out (photoluminescence), estimate the field, repeat. The
+digital twin of an NV sensor uses different Hamiltonians but the same
+controller grammar.
+
+* Ultra-Low-Field MRI
+
+Conventional MRI uses superconducting magnets (1.5--7 T) that cost
+millions and weigh tonnes. Ultra-low-field (ULF) MRI operates at
+microtesla fields, where:
+
+- The Larmor frequency drops into the audio range (~2 kHz at 50 μT)
+- SQUID or OPM sensors replace the induction coils used at high field
+- The scanner can be lightweight, portable, and inexpensive
+
+The physics of ULF-MRI is /the same Bloch equations/ that govern an
+atomic magnetometer. The T₁ and T₂ relaxation times, the precession
+dynamics, the pulse sequence design --- all appear in MāyāPramāṇa's
+lesson 00. The digital twin of a ULF-MRI system is, in a precise
+sense, the digital twin of a magnetometer with a structured sample.
+
+ULF-MRI combined with MEG (using the same sensor array for both)
+is an active area of research: a single instrument that provides
+both functional (MEG) and structural (MRI) brain imaging, without
+cryogenics, without superconducting magnets, portable enough for
+a rural clinic.
+
+The controller challenges are formidable: pulse sequence optimisation,
+encoding gradient design, image reconstruction from sparse, noisy
+data --- all expressible in the language of estimation, feedback, and
+information.
+
+* Biomagnetism and Regenerative Medicine
+
+Beyond brain and heart, biological magnetic fields arise from:
+
+- *Peripheral nerve conduction*: the magnetic field of an action
+  potential propagating along a peripheral nerve can be detected with
+  sensitive magnetometers, offering non-invasive neurography
+- *Muscle activity*: magnetomyography (MMG) --- the magnetic
+  counterpart of electromyography --- provides spatially resolved
+  information about muscle fibre recruitment
+- *Wound currents*: injured tissue generates ionic currents
+  (the "current of injury") that produce detectable magnetic fields;
+  tracking these fields could monitor wound healing non-invasively
+- *Bone growth*: piezoelectric effects in bone under mechanical stress
+  generate magnetic fields that correlate with osteogenic activity
+
+These signals are weak and the biology is complex, but the sensor
+physics and control challenges are variations on the same themes.
+A universal controller that can be configured for different sensor
+types, different noise environments, and different signal
+characteristics enables exploration of these frontiers without
+rebuilding the control stack from scratch.
+
+* Quantum Sensing for Point-of-Care Diagnostics
+
+The convergence of miniaturised quantum sensors, FPGA-based digital
+controllers, and machine learning for signal processing creates the
+possibility of portable diagnostic devices:
+
+- *Portable MEG*: helmet-based OPM systems for bedside or ambulance
+  use --- detecting strokes, seizures, traumatic brain injury in the
+  field
+- *Portable MCG*: cardiac screening without ECG electrodes, suitable
+  for mass screening programmes
+- *NV-diamond biosensors*: chip-scale NMR for blood chemistry, drug
+  levels, biomarker detection at the point of care
+- *Quantum-enhanced pulse oximetry*: precision measurement of blood
+  oxygenation using quantum sensing modalities
+
+The bottleneck is not the sensors. The sensor physics is advancing
+rapidly. The bottleneck is the /control and calibration/ --- the
+firmware, the feedback loops, the estimation algorithms, the noise
+rejection. This is precisely what a universal controller addresses.
+
+* The Pedagogical Dimension
+
+#+begin_quote
+The best way to learn is to teach; the best way to teach is to build.
+#+end_quote
+
+The structural parallels across these applications create a unique
+pedagogical opportunity. A course built around MāyāPramāṇa can teach:
+
+| Physics | Through |
+|---------|---------|
+| Bloch equations | Atomic magnetometer /and/ NMR/MRI |
+| Spin dynamics | Alkali vapors /and/ NV centres |
+| Feedback control | Laser locking /and/ field cancellation |
+| Kalman filtering | Magnetometer drift /and/ neural state estimation |
+| Fisher information | Sensor sensitivity /and/ source localisation |
+| Noise analysis | Shot noise /and/ biological artifact rejection |
+
+A student who builds a digital twin of an atomic magnetometer and
+then sees the /same/ Bloch equations reappear in an MRI pulse
+sequence has learned something deeper than either topic alone. The
+universal controller is not just a tool --- it is a /curriculum/,
+organised around the unity of measurement physics.
+
+This connects directly to MāyāLucIA's broader pedagogical vision:
+understanding through creation, verified manuscripts, the Feynman
+imperative. The digital twin is both the teaching tool and the
+assessment --- if the model works, the student understands.
+
+* From Here
+
+The applications listed here are not a roadmap. They are a landscape.
+MāyāPramāṇa will begin where the physics is clearest and the
+collaborator is at hand --- Saikat's atomic magnetometers. But the
+grammar we build should be written with awareness that the same
+words will be spoken in neuroscience clinics, in cardiology wards,
+in portable diagnostic kits, in classrooms where the Bloch equations
+come alive as a magnetometer simulation rather than a homework
+problem.
+
+The digital twin does not know what it is measuring. That is its
+strength.

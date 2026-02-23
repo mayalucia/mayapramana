@@ -1,0 +1,10 @@
+#+title: Prototype
+
+#+begin_src bash
+wc -c  ../../../resources/*.org
+#+end_src
+
+#+RESULTS:
+| 66766 | resources/Quantum                                  | Technology | UG | Lab | Proposal_.org |
+| 11003 | resources/Workshop_agenda_v2_20241205.org          |            |    |     |               |
+| 77769 | total                                              |            |    |     |               |

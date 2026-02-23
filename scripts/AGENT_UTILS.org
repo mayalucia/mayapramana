@@ -1,0 +1,64 @@
+#+TITLE: Agent Utility Index — Future MCP Candidate
+#+AUTHOR: mu2tau + claude
+#+DATE: 2026-02-22
+
+* Purpose
+
+Lightweight agent-operational utilities that live in =scripts/= and are
+invoked via Bash. When this index reaches *4+ entries*, consolidate into
+a dedicated MCP server (working name: =māyāsevā= — service/support).
+
+*Trigger condition*: ≥ 4 utilities with distinct purposes, used across
+multiple sessions.
+
+* Current Index
+
+| # | Utility                | Purpose                              | Added      | Sessions used |
+|---+------------------------+--------------------------------------+------------+---------------|
+| 1 | sanitize-for-agent.py  | Strip JSON-hostile Unicode (U+2028…) | 2026-02-22 | 1             |
+
+* When the trigger flips — MCP server spec
+
+** Name
+=mayaseva= (māyāsevā — operational support for the agent layer)
+
+** Scope
+Agent-operational utilities: file preparation, format conversion,
+encoding safety, import/export helpers. *Not* science, *not*
+visualization — those belong in =mayatools= and the computational
+modules.
+
+** Design constraints
+- Stdio transport (like mayatools)
+- Python, minimal dependencies (stdlib + maybe =chardet= for encoding detection)
+- Each tool is a thin wrapper around the existing =scripts/*.py= files
+- Tools should be idempotent and safe to call repeatedly
+
+** Candidate tool signatures (sketch)
+
+#+begin_src text
+sanitize(path: str, check_only: bool = false) → {status: "clean"|"fixed"|"dirty", count: int}
+  Strip JSON-hostile Unicode from a file. With check_only, report without modifying.
+
+detect_encoding(path: str) → {encoding: str, confidence: float}
+  Detect file encoding before reading. (Would need chardet.)
+
+convert_to_utf8(path: str) → {status: str, original_encoding: str}
+  Convert file to UTF-8 in-place.
+
+import_resource(source: str, dest_name: str) → {path: str, sanitized: bool}
+  Copy external file into resources/, sanitize, return clean path.
+#+end_src
+
+Only =sanitize= exists today. The others are placeholders based on plausible needs — delete or revise when the trigger flips.
+
+** Integration
+- Register in =~/.claude/settings.json= alongside =mayatools=
+- Add to CLAUDE.md so the agent knows to prefer MCP tools over Bash calls
+- Retire the =scripts/= Bash convention for anything that moves into the server
+
+* Revision log
+
+| Date       | Change                                      |
+|------------+---------------------------------------------|
+| 2026-02-22 | Created. Initial entry: sanitize-for-agent. |

@@ -1,0 +1,1404 @@
+#+title: MāyāPramāṇa Curriculum
+#+subtitle: The Phantom Faculty Makes Everyone a Student Again
+#+author: MāyāPramāṇa
+#+date: February 2026
+
+#+begin_quote
+The supreme task of the physicist is to arrive at those universal elementary laws from which the cosmos can be built up by pure deduction. There is no logical path to these laws; only intuition, resting on sympathetic understanding of experience, can reach them.
+--- Albert Einstein
+#+end_quote
+
+* Purpose
+
+This document is the master curriculum for MāyāPramāṇa's lesson
+sequence. It takes anyone who needs to understand, simulate, and
+eventually control a Bell-Bloom atomic magnetometer --- and provides
+the physics, signal processing, and control theory to do so.
+
+Everyone who comes to this material is a student of something.
+The first-year graduate student is a student of quantum mechanics.
+The experimental physicist is a student of Kalman filters. The
+control engineer is a student of Bloch equations. The AI agent is
+a student of what it means when hardware refuses to cooperate.
+The curriculum does not assume a single entry point or a single
+gap. It assumes collaborators with different partial expertise
+arriving with different priors.
+
+The curriculum fills the "physics-shaped hole" in Saikat's UQSC
+prototype: the prototype tells you /what/ to build; these lessons
+teach you /why/ each piece works.
+
+See =collab/phantom-faculty-everyone-a-student.org= for the
+pedagogical philosophy: five modes of understanding (derivation,
+geometric intuition, encounter, compression, construction) available
+to any collaborator at any moment, mediated by an AI agent.
+
+** The Baseline
+
+The lessons assume undergraduate physics (or equivalent knowledge
+from adjacent fields). The cadenza system handles the gaps --- what
+one collaborator can skip, another may need.
+
+*The undergraduate canon* (what a standard physics graduate has):
+
+| Subject               | Textbook level    | What they have                               |
+|-----------------------+-------------------+----------------------------------------------|
+| Classical Mechanics   | Goldstein (rusty) | Lagrangian, Hamiltonian, Poisson brackets    |
+| Electromagnetism      | Griffiths         | Maxwell's equations, waves, polarization     |
+| Quantum Mechanics     | Griffiths         | Schrödinger equation, hydrogen atom,         |
+|                       |                   | perturbation theory, spin-½ as postulate     |
+| Statistical Mechanics | Pathria/Reif      | Boltzmann distribution, partition functions, |
+|                       |                   | ensembles                                    |
+| Linear Algebra        | Strang            | Eigenvalues, matrix decomposition,           |
+|                       |                   | vector spaces                                |
+| Programming           | Basic Python      | NumPy, plotting, no functional programming   |
+
+*What they do not know* (what we must teach):
+
+- Density matrix formalism and open quantum systems
+- Atom-light interaction beyond Fermi's golden rule
+- Optical pumping and rate equations
+- Signal processing (lock-in, filtering, spectral analysis)
+- State estimation (Kalman filters, Bayesian inference)
+- Feedback control theory (PID, transfer functions, stability)
+- Functional programming (Haskell, C++ templates)
+
+** Pedagogical Principles: The Five Modes
+
+These are not teaching /styles/. They are five distinct claims about
+how understanding works. Each is available to any collaborator at any
+moment. The AI agent shifts between them as the situation demands.
+
+*** Derivation (Landau)
+
+Landau's /Course of Theoretical Physics/ embodies a principle we
+adopt: /every result is derived, not stated/. No equation falls from
+the sky. Each derivation starts from something already established
+--- an axiom, a previous result, or a physical argument. The
+collaborator never has to accept a claim on authority alone.
+
+- *No result without derivation*
+- *Derivations start from established ground*
+- *Physical arguments before algebraic manipulation*
+- *Dimensional analysis as sanity check at every stage*
+- *Order-of-magnitude estimates before exact solutions*
+
+*** Geometric Intuition (Thorne)
+
+Thorne's /Modern Classical Physics/ demonstrates that physical
+intuition can be taught --- through geometric reasoning, through
+cross-domain connections, through the habit of asking "what happens
+in the limit?" before computing.
+
+- *Geometric/pictorial reasoning* whenever possible (Bloch sphere,
+  phase space, Bode plots, information geometry)
+- *Cross-domain connections made explicit*: the same Bloch equations
+  in NMR, MRI, and atomic clocks; the same Kalman filter in
+  magnetometry and navigation
+- *Physical intuition questions embedded*: "What happens if
+  $T_2 \to 0$? What does that mean for the atoms?"
+- *Information-theoretic thread*: Fisher information connects noise
+  (Lesson 05) → estimation (Lesson 07) → control (Lesson 08)
+
+For the collaborator crossing from one domain to another, Thorne's
+cross-domain map /is/ the teaching: "this is the same transfer
+function you know from..."
+
+*** Encounter (Feynman)
+
+Feynman re-derived in front of you, including the wrong turns. The
+listener watches understanding happen, not understanding reported.
+
+- *Start with the phenomenon*: each lesson opens with something the
+  collaborator can /watch/ --- a precessing spin, a locking signal,
+  a noise spectrum --- and the question "why does it do that?"
+- *Multiple representations*: the same physics in Python
+  (exploratory), Haskell (algebraic), C++ (performant). What
+  survives all representations is what you actually understand.
+- *Permission to be a beginner*: in a post-hierarchical setting,
+  Feynman's deepest contribution is the senior physicist saying
+  "wait, I don't understand this yet --- can we go back to basics?"
+  without shame.
+
+*** Compression (Susskind)
+
+Susskind's /Theoretical Minimum/ is not simplification but
+/compression/: finding the shortest path through the mathematics
+that still reaches the physics honestly.
+
+- *The minimum, and nothing more*: each lecture introduces exactly
+  the mathematical structure needed. Every tool earns its place by
+  being /used/ in the same lesson that introduces it.
+- *Classical before quantum, deliberately*: the Poisson bracket
+  $\{L_i, L_j\} = \epsilon_{ijk} L_k$ is the classical shadow of
+  $[J_i, J_j] = i\hbar\epsilon_{ijk}J_k$. The bridge is /felt/
+  because both sides are developed.
+- *The honest description*: the density matrix is not advanced ---
+  it is the honest description of a quantum system that interacts
+  with anything. Mixed states are the default.
+- *Exercises as the learning*: the exercise forces the collaborator
+  to /use/ the framework, and in using it, to own it.
+- *Conversational rigour*: the tone of a colleague who happens to
+  know the terrain better --- not a lecturer performing authority.
+
+For the collaborator crossing domains, compression takes on a
+second role: finding the shortest honest bridge between what you
+know and what you need to know.
+
+*** Construction (The Manifesto)
+
+/What I cannot create, I do not understand./ --- Feynman's last
+blackboard.
+
+- *Running code as proof*: every lesson produces implementations in
+  three languages that must agree with each other and with the
+  analytical results.
+- *Three languages, one physics*: Python (intuition), Haskell
+  (specification), C++ (deployment). All must agree.
+- *Tests are specifications*: "Bloch norm conserved under pure
+  precession", not "test_bloch_3".
+- *Pramāṇa framework*: pratyakṣa (the raw signal), anumāna (the
+  inference from it), upamāna (one sensor teaches us about another).
+
+** How the Lessons Use These Principles
+
+The five modes --- Derivation, Geometric Intuition, Encounter,
+Compression, and Construction --- are not interchangeable. Each
+contributes something the others do not. The art is knowing when
+to invoke which mode. Below we show where each appears in the
+lesson sequence.
+
+*** Landau governs the derivations
+
+Every equation in the curriculum is /derived/, not stated. But Landau's voice is strongest in the core physics progression of each lesson --- the numbered sections where one result leads to the next through physical argument and algebra.
+
+| Lesson | The Landau moment |
+|--------+-------------------|
+| 00 | The Bloch equations follow from $d\mathbf{M}/dt$ with three physical terms, each named and justified |
+| 01 | Quantization of angular momentum /forced/ by the algebra of ladder operators --- not postulated |
+| 02 | Rabi oscillations derived from the time-dependent Schrödinger equation with one approximation (RWA), stated and bounded |
+| 04 | The dispersive lineshape derived from the complex susceptibility --- the error signal is not pulled from a hat |
+| 05 | The Cramér-Rao bound from the curvature of the log-likelihood --- not "here is a formula for the best you can do" |
+| 07 | The Kalman filter from Bayesian updating of Gaussians --- every step, no skipping to the algorithm |
+
+The Landau test: /can the collaborator, given the previous lesson, reproduce this derivation on a blank page?/ If not, the derivation has a gap.
+
+*** Thorne governs the intuition
+
+Thorne's voice appears wherever the lesson pauses to ask "what does this /mean/?" --- and wherever a picture or a limiting case illuminates more than another line of algebra.
+
+| Lesson | The Thorne moment |
+|--------+-------------------|
+| 00 | The Bloch sphere as the geometric arena for spin dynamics; $T_2 \to 0$ as the "lose all phase information" limit |
+| 01 | SU(2) vs SO(3) --- the double cover as a /geometric/ fact about rotations of spinors, not a group-theory technicality |
+| 02 | The avoided crossing (dressed states) as a /picture/ of atom-field coupling |
+| 04 | The dispersive signal crosses zero at resonance: sketch it, /see/ why it is an error signal |
+| 05 | The Allan deviation plot as a /portrait/ of noise character --- slope tells you the physics |
+| 08 | The Bode plot as a portrait of the feedback loop's character; gain margin and phase margin as geometric distances from instability |
+
+Cross-domain connections are Thorne's signature. We use them deliberately:
+
+- The /same/ Bloch equations in NMR (Lesson 04 cadenza), MRI, and atomic magnetometry
+- The /same/ Kalman filter in magnetometry (Lesson 07) and magnetic anomaly navigation (resources/magnetic-anomaly-navigation.org)
+- The /same/ PID structure in laser locking (Lesson 11) and Larmor tracking (Lesson 12)
+- Fisher information as the thread connecting noise (05) → estimation (07) → control (08)
+
+The Thorne test: /can the collaborator draw a picture that captures the essential physics, without writing an equation?/
+
+*** Susskind governs the scope
+
+Susskind's voice is the editor. It decides what belongs in the main lesson body and what belongs in a cadenza. The criterion is the Theoretical Minimum: /what is the shortest honest path from where the collaborator stands to the physics they need?/
+
+Our *cadenzas* are Susskind's interludes --- necessary mathematical or physical detours that some collaborators need and others can skip. The main lesson body must be self-contained without them.
+
+| Lesson | Main body (the minimum) | Cadenza (for those who need it) |
+|--------+-------------------------+---------------------------------|
+| 01 | Commutation relations → ladder operators → quantization → Pauli matrices → density matrix → Bloch derivation | =stern-gerlach= (the experiment), =su2-vs-so3= (the geometry), =density-matrix-motivation= (the why) |
+| 02 | Dipole approximation → Rabi frequency → RWA → optical Bloch equations | =dipole-matrix-elements= (the computation), =time-dependent-perturbation-review= (the connection to Fermi's golden rule) |
+| 03 | Hyperfine structure of Rb → selection rules → rate equations → dark states → $M_0$ | =clebsch-gordan-coefficients= (how to compute them), =rate-vs-master-equation= (when rate equations fail) |
+| 05 | Shot noise → quantum projection noise → Cramér-Rao bound → Allan deviation | Fluctuation-dissipation (for the stat-mech-inclined), SERF regime (advanced, not needed for Bell-Bloom) |
+
+Susskind's classical-before-quantum bridge is explicit in Lesson 01: the physics progression starts with /classical/ angular momentum as a generator of rotations (Poisson brackets, SO(3)), then crosses to quantum (commutators, SU(2)). The collaborator feels the bridge because both sides are developed, not because the classical side is handwaved as "review."
+
+The Susskind test: /if a section were removed, would the collaborator be unable to follow the next lesson?/ If yes, it stays in the main body. If no, it is a cadenza or an exercise.
+
+*** The Manifesto governs the method
+
+The Manifesto's voice is distinctive because it is /ours/ --- not inherited from a textbook tradition. It contributes three things the others do not:
+
+*Running code as proof of understanding.* Landau derives, Thorne draws, Susskind compresses --- but none of them require the collaborator to /build/. We do. Every lesson produces implementations in three languages, and those implementations must agree with each other and with the analytical results. The code is not illustration; it is verification.
+
+| Lesson | What the code proves |
+|--------+----------------------|
+| 00 | The Bloch equations conserve norm under pure precession (numerical verification of an analytical claim) |
+| 01 | The commutation relations close (algebraic verification); the density matrix from a Bloch vector is Hermitian, unit-trace, positive-semidefinite (constructive verification) |
+| 04 | The FFT of a simulated FID recovers the Larmor frequency (signal-processing verification of a physics prediction) |
+| 07 | The Kalman filter covariance converges to the Cramér-Rao bound (estimation theory verified against information theory) |
+| 09 | The complete pipeline extracts a 100 fT brain signal from 50 μT background (end-to-end verification) |
+
+*Tests as specifications.* A test name is a physics claim: "Bloch norm conserved under pure precession." If the test passes, the claim is verified. If it fails, either the code or the physics is wrong. This is a form of rigour that Landau would recognise --- but expressed in a medium he did not have.
+
+*The pramāṇa framework.* Each lesson's content maps onto an epistemological mode:
+- /Pratyakṣa/ (direct perception): the raw signal, the plot, the simulation output
+- /Anumāna/ (inference): the estimation, the model, the derivation
+- /Upamāna/ (analogy): the cross-domain connection --- the same Bloch equations in NMR and atomic magnetometry, the same Kalman filter in navigation and sensing
+
+This is not decoration. It is a claim about /how understanding works/: we perceive, we infer, we recognise patterns across domains. The curriculum follows this cycle in each lesson and across the whole sequence.
+
+** The Logic of the Instrument
+
+The curriculum follows the signal chain of the magnetometer itself:
+
+#+begin_example
+Prepare     →  Precess     →  Read Out    →  Process     →  Estimate  →  Control
+(pumping)      (Larmor)       (probe)        (lock-in)      (Kalman)     (PID)
+Lesson 03      Lesson 00      Lesson 02      Lesson 06      Lesson 07    Lesson 08
+               Lesson 04
+#+end_example
+
+But we teach it in a different order --- the /logical/ order, where
+each lesson depends only on what came before:
+
+#+begin_example
+00: Bloch Equations (the dynamical foundation)
+ └─ 01: Angular Momentum & Quantum Spin (why spin is quantized)
+     └─ 02: Atom-Light Interaction (how light drives atoms)
+         └─ 03: Optical Pumping (preparing the spin state)
+             └─ 04: Magnetic Resonance (the measurement scheme)
+                 └─ 05: Noise & Sensitivity Limits (fundamental bounds)
+                     └─ 06: Signal Processing (extracting the signal)
+                         └─ 07: State Estimation (optimal inference)
+                             └─ 08: Feedback & Control (closing the loop)
+                                 └─ 09: The Complete Magnetometer (capstone)
+#+end_example
+
+After the physics is solid, we bridge to hardware:
+
+#+begin_example
+09: Complete Magnetometer
+ ├─ 10: From Equations to Hardware (the effectful shell)
+ ├─ 11: Laser Frequency Stabilization (DAVLL + servo)
+ └─ 12: The Phase-Locked Loop (Larmor tracking)
+#+end_example
+
+* Part I: The Physics
+
+** Lesson 00 — The Bloch Equations
+:PROPERTIES:
+:STATUS: COMPLETE
+:FILE: lessons/00-bloch-equations/concept.org
+:DEPENDS: (none)
+:EXPORTS: BlochState, BlochParams, bloch_derivative, rk4_step, simulate, rb87Params
+:END:
+
+#+begin_quote
+/I think I can safely say that nobody understands quantum mechanics./
+--- Richard Feynman
+#+end_quote
+
+*** What This Lesson Covers
+
+The Bloch equations as the dynamical foundation:
+
+$$\frac{d\mathbf{M}}{dt} = \gamma \mathbf{M} \times \mathbf{B}
+  - \begin{pmatrix} M_x / T_2 \\ M_y / T_2 \\ (M_z - M_0) / T_1 \end{pmatrix}$$
+
+- The Bloch vector as a parametrization of the spin-½ density matrix
+- Pure precession ($\gamma \mathbf{M} \times \mathbf{B}$) as unitary evolution
+- Transverse relaxation ($T_2$): decoherence, loss of phase information
+- Longitudinal relaxation ($T_1$): thermalisation toward equilibrium
+- Numerical integration: RK4 as a state transformation
+- Simulation as a fold (=scanl=) over time
+
+*** Key Equations
+
+| Equation | Physical meaning |
+|----------+------------------|
+| $\omega_L = \gamma \vert\mathbf{B}\vert$ | Larmor frequency |
+| $\gamma_F = g_F \mu_B / \hbar$ | Effective gyromagnetic ratio |
+| $\rho = \frac{1}{2}(\mathbf{I} + \mathbf{M} \cdot \boldsymbol{\sigma})$ | Density matrix ↔ Bloch vector |
+
+*** Verification Claims
+
+- "Bloch norm conserved under pure precession" ($T_1, T_2 \to \infty$)
+- "Spin returns to initial state after one Larmor period"
+- "Longitudinal relaxation reaches $M_0$ within $e^{-5}$ after $5T_1$"
+- "Transverse envelope decays as $e^{-t/T_2}$"
+
+*** Connects to UQSC
+
+Foundation for everything. The Bloch equations govern every stage of
+the magnetometer that the UQSC prototype controls.
+
+*** Status
+
+Complete. Establishes the lesson pattern: opening quote, physics with
+cadenza blocks, three implementations, verification, exercises,
+closing quote.
+
+** Lesson 01 — Angular Momentum and the Quantum Spin
+:PROPERTIES:
+:STATUS: PLANNED
+:FILE: lessons/01-quantum-spin/concept.org
+:DEPENDS: 00
+:EXPORTS: SpinState, DensityMatrix, pauli_matrices, rotation_operator, angular_momentum_algebra
+:END:
+
+#+begin_quote
+/Everyone who has learned about the spinning electron knows that
+the most basic properties of the electron can't be described by
+classical mechanics. So the student is told to forget about it.
+But it's not possible to forget about it, as long as the
+mathematical equations contain the image of a spinning sphere./
+--- Lev Landau, Quantum Mechanics
+#+end_quote
+
+*** Why This Lesson
+
+Lesson 00 /uses/ the Bloch vector but doesn't derive /why/ spin is
+quantized. The graduate student who has read Griffiths QM has seen
+spin-½ introduced as a postulate ("there exists an intrinsic angular
+momentum with $s = 1/2$"). This lesson shows that quantization
+/emerges from the algebra of angular momentum/ --- it is not a
+separate postulate but a consequence of the commutation relations.
+
+Without this lesson, the student treats the Bloch equations as
+phenomenological. With it, they see that the Bloch vector is the
+density matrix in disguise, and that the density matrix is the
+natural language for a spin coupled to its environment.
+
+*** Physics Progression
+
+1. *Classical angular momentum as a generator of rotation*
+   - $\mathbf{L} = \mathbf{r} \times \mathbf{p}$, but more deeply:
+     $\{L_i, f\} = $ rotation of $f$ about axis $i$
+   - Poisson bracket $\{L_i, L_j\} = \epsilon_{ijk} L_k$
+   - Angular momentum generates the rotation group SO(3)
+
+2. *From classical to quantum: the commutation relations*
+   - Canonical quantization: $\{,\} \to \frac{1}{i\hbar}[,]$
+   - $[J_i, J_j] = i\hbar \epsilon_{ijk} J_k$
+   - These relations alone — without any reference to orbits or
+     wavefunctions — determine everything
+
+3. *The algebra forces quantization*
+   - Ladder operators $J_\pm = J_x \pm i J_y$
+   - $[J_z, J_\pm] = \pm\hbar J_\pm$ (raising/lowering by one unit)
+   - $[J_+, J_-] = 2\hbar J_z$
+   - The algebra closes only if $j = 0, \frac{1}{2}, 1, \frac{3}{2}, \ldots$
+   - Half-integer values: intrinsic angular momentum (spin) — not
+     orbits, not classical, forced by the mathematics
+
+4. *Spin-½: the Pauli matrices*
+   - The $j = 1/2$ representation: $\mathbf{J} = \frac{\hbar}{2}\boldsymbol{\sigma}$
+   - $\sigma_x, \sigma_y, \sigma_z$ as generators of SU(2)
+   - Why SU(2), not SO(3)? The double cover — rotate $2\pi$ and the
+     state picks up a minus sign. Spinors are not vectors.
+
+5. *The density matrix: why pure states are not enough*
+   - A spin in thermal equilibrium: $\rho = e^{-H/k_BT} / Z$
+   - A spin entangled with its environment: partial trace → mixed state
+   - The density matrix $\rho$ is the honest description of a
+     quantum system that interacts with a bath
+   - Properties: Hermitian, unit trace, positive semidefinite
+   - Pure state: $\rho^2 = \rho$, $\text{tr}(\rho^2) = 1$
+   - Mixed state: $\text{tr}(\rho^2) < 1$
+
+6. *Back to Bloch: the derivation*
+   - A $2 \times 2$ Hermitian matrix with unit trace has 3 real
+     parameters → $\rho = \frac{1}{2}(\mathbf{I} + \mathbf{M} \cdot \boldsymbol{\sigma})$
+   - $M_i = \text{tr}(\rho \sigma_i)$ — the Bloch vector is the
+     expectation value of the Pauli matrices
+   - $|\mathbf{M}| = 1$: pure state (surface of Bloch sphere)
+   - $|\mathbf{M}| < 1$: mixed state (interior)
+   - Von Neumann equation $i\hbar \dot{\rho} = [H, \rho]$ with
+     $H = -\frac{\gamma\hbar}{2}\boldsymbol{\sigma} \cdot \mathbf{B}$
+     → the precession term of Lesson 00
+   - Lindblad dissipator → the relaxation terms of Lesson 00
+   - *The Bloch equations are now derived, not postulated*
+
+*** Key Equations
+
+| Equation | Physical meaning |
+|----------+------------------|
+| $[J_i, J_j] = i\hbar \epsilon_{ijk} J_k$ | Angular momentum algebra |
+| $J^2 \vert j,m\rangle = \hbar^2 j(j+1) \vert j,m\rangle$ | Quantization of angular momentum |
+| $J_\pm \vert j,m\rangle = \hbar\sqrt{j(j+1)-m(m\pm 1)} \vert j,m\pm 1\rangle$ | Ladder operators |
+| $\rho = \frac{1}{2}(\mathbf{I} + \mathbf{M} \cdot \boldsymbol{\sigma})$ | Density matrix ↔ Bloch vector |
+| $i\hbar\dot{\rho} = [H, \rho]$ | Von Neumann equation |
+| $\dot{\rho} = -\frac{i}{\hbar}[H,\rho] + \mathcal{L}[\rho]$ | Lindblad master equation |
+
+*** Computational Content
+
+- Python :: Construct Pauli matrices, compute commutators,
+  demonstrate $[J_i, J_j] = i\hbar\epsilon_{ijk}J_k$ numerically.
+  Build a density matrix from a Bloch vector, check purity. Visualise
+  the Bloch sphere with a state trajectory.
+- Haskell :: =DensityMatrix= type with smart constructor enforcing
+  Hermiticity and unit trace. Algebraic verification of angular
+  momentum commutation relations. Property: rotating a pure state
+  preserves purity.
+- C++ :: =constexpr= Pauli matrices. Compile-time verification that
+  $\sigma_i \sigma_j = \delta_{ij} I + i\epsilon_{ijk}\sigma_k$.
+
+*** Verification Claims
+
+- "Angular momentum commutation relations close"
+- "Ladder operators produce correct Clebsch-Gordan coefficients for $j = 1/2$"
+- "Density matrix from Bloch vector is Hermitian, unit trace, positive semidefinite"
+- "Von Neumann equation reproduces Bloch precession"
+- "Lindblad dissipator reproduces $T_1, T_2$ relaxation"
+
+*** Cadenzas
+
+- =stern-gerlach=: The experiment that forced quantization. For
+  students who haven't seen it or have forgotten.
+- =su2-vs-so3=: Why spinors need a double cover. Physical
+  consequences: the neutron interferometry experiment, the Berry
+  phase.
+- =density-matrix-motivation=: Why not just use state vectors? The
+  environment. Decoherence. The honest description of a quantum
+  system you can't isolate.
+
+*** Exercises
+
+1. *Spin-1 Bloch vector*: Generalise to $j = 1$. The density matrix
+   is $3\times 3$. How many real parameters? What replaces the Bloch
+   sphere?
+2. *Thermal equilibrium*: Compute $\rho$ for a spin-½ in a field
+   $B_z$ at temperature $T$. Plot $\langle M_z \rangle$ vs $T$.
+   What is $M_0$ (the equilibrium magnetization in the Bloch
+   equations)?
+3. *Decoherence*: Starting from a pure state $|\uparrow_x\rangle$,
+   evolve under the Lindblad equation with $T_2$ dephasing. Plot
+   $\text{tr}(\rho^2)$ vs time. The state becomes mixed — this is
+   decoherence.
+
+** Lesson 02 — Atom-Light Interaction
+:PROPERTIES:
+:STATUS: PLANNED
+:FILE: lessons/02-atom-light/concept.org
+:DEPENDS: 00, 01
+:EXPORTS: RabiOscillation, OpticalBlochEqs, dipole_matrix_element, rabi_frequency, rotating_frame
+:END:
+
+#+begin_quote
+/The career of a young theoretical physicist consists of treating the
+harmonic oscillator in ever-increasing levels of abstraction./
+--- Sidney Coleman
+#+end_quote
+
+*** Why This Lesson
+
+The magnetometer uses a laser to both /prepare/ (optical pumping) and
+/read out/ (Faraday rotation) the atomic spin state. The student must
+understand how electromagnetic radiation drives atomic transitions ---
+not at the level of Fermi's golden rule (a rate, coarse-grained) but
+at the level of Rabi oscillations (coherent dynamics, fine-grained).
+
+This is where the Bloch equations of Lesson 00 gain a /source term/:
+the driving field. And where the two-level atom --- the simplest
+quantum system --- meets the classical electromagnetic field.
+
+*** Physics Progression
+
+1. *The electric dipole approximation*
+   - Full interaction: $H' = -e\mathbf{r} \cdot \mathbf{E}(t)$
+   - Why $\mathbf{E} \cdot \mathbf{r}$ and not the full
+     $\mathbf{A} \cdot \mathbf{p}$: wavelength >> atomic size
+   - Dipole matrix element $\mathbf{d}_{12} = e\langle 1|\mathbf{r}|2\rangle$
+
+2. *Selection rules from angular momentum*
+   - The photon carries angular momentum $\ell = 1$
+   - $\Delta m = 0$ (linear, $\pi$), $\pm 1$ (circular, $\sigma^\pm$)
+   - Triangle rule: $|j_1 - 1| \leq j_2 \leq j_1 + 1$
+   - Parity: electric dipole → parity must change
+   - This is the payoff of Lesson 01's angular momentum algebra
+
+3. *Two-level atom in a classical field: Rabi oscillations*
+   - Hamiltonian: $H = \frac{\hbar\omega_0}{2}\sigma_z + \frac{\hbar\Omega}{2}(\sigma_+ e^{-i\omega t} + \sigma_- e^{i\omega t})$
+   - Rabi frequency: $\Omega = \mathbf{d}_{12} \cdot \mathbf{E}_0 / \hbar$
+   - Exact solution: oscillation between $|1\rangle$ and $|2\rangle$
+     at the generalised Rabi frequency
+     $\tilde{\Omega} = \sqrt{\Omega^2 + \Delta^2}$
+   - $\pi$-pulse: complete inversion. $\pi/2$-pulse: equal
+     superposition.
+
+4. *The rotating wave approximation (RWA)*
+   - Near resonance ($|\Delta| \ll \omega$), counter-rotating terms
+     average out
+   - Validity criterion: $\Omega \ll \omega_0$
+   - What breaks down beyond the RWA: Bloch-Siegert shift
+
+5. *Dressed states*
+   - Diagonalise $H$ in the rotating frame → avoided crossing
+   - The atom-field system as a single entity
+   - Autler-Townes splitting: the spectroscopic signature
+
+6. *Spontaneous emission*
+   - Physical argument: the vacuum fluctuations drive decay
+   - Einstein $A$ coefficient: $A_{21} = \omega_0^3 |\mathbf{d}_{12}|^2 / (3\pi\epsilon_0\hbar c^3)$
+   - Lifetime $\tau = 1/A_{21}$; for Rb D2 line: $\tau \approx 26$ ns
+   - Weisskopf-Wigner: exponential decay of the excited state
+
+7. *The optical Bloch equations*
+   - Bloch equations (Lesson 00) + spontaneous emission (this lesson)
+   - Three components: precession (coherent drive), dephasing
+     ($\gamma_2 = A_{21}/2 + \gamma_\text{coll}$), decay ($\gamma_1 = A_{21}$)
+   - Steady-state solution: saturation, power broadening
+   - The connection: Lesson 00's phenomenological $T_1, T_2$ now have
+     microscopic content
+
+*** Key Equations
+
+| Equation | Physical meaning |
+|----------+------------------|
+| $\Omega = \mathbf{d}_{12} \cdot \mathbf{E}_0 / \hbar$ | Rabi frequency (coupling strength) |
+| $\tilde{\Omega} = \sqrt{\Omega^2 + \Delta^2}$ | Generalised Rabi frequency (includes detuning) |
+| $P_2(t) = \frac{\Omega^2}{\tilde{\Omega}^2}\sin^2(\tilde{\Omega}t/2)$ | Rabi oscillation (excitation probability) |
+| $A_{21} = \frac{\omega_0^3 |\mathbf{d}_{12}|^2}{3\pi\epsilon_0\hbar c^3}$ | Spontaneous emission rate |
+
+*** Verification Claims
+
+- "Rabi oscillation period matches $2\pi/\tilde{\Omega}$"
+- "$\pi$-pulse achieves complete population inversion"
+- "Steady-state population saturates at $1/2$ for $\Omega \gg \Gamma$"
+- "Optical Bloch equations reduce to Lesson 00 when drive is off"
+
+*** Cadenzas
+
+- =dipole-matrix-elements=: How to compute
+  $\langle n'l'm'|\mathbf{r}|nlm\rangle$ for hydrogen-like atoms.
+  Radial and angular parts. Wigner-Eckart theorem (statement +
+  physical meaning, not proof).
+- =time-dependent-perturbation-review=: Fermi's golden rule as a
+  coarse-grained limit of Rabi oscillations. When is the rate
+  description valid?
+- =semiclassical-vs-quantum-field=: We treat the laser classically.
+  When does this break down? Jaynes-Cummings model preview.
+
+*** Exercises
+
+1. *Off-resonant Rabi*: Plot $P_2(t)$ for $\Delta = 0, \Omega, 3\Omega$.
+   Observe: off-resonance, the oscillation is faster but incomplete.
+2. *Optical Bloch equations*: Simulate the OBE for a two-level atom
+   driven by a laser that turns on at $t = 0$. Observe transient Rabi
+   oscillations damping to steady state.
+3. *Saturation parameter*: Define $s = \Omega^2 / (2\Delta^2 + \Gamma^2/2)$.
+   Show that the steady-state excited population is
+   $\rho_{22} = \frac{s/2}{1+s}$. What does $s \gg 1$ mean physically?
+
+** Lesson 03 — Optical Pumping
+:PROPERTIES:
+:STATUS: PLANNED
+:FILE: lessons/03-optical-pumping/concept.org
+:DEPENDS: 00, 01, 02
+:EXPORTS: HyperfineLevel, PumpingRateEqs, population_dynamics, equilibrium_polarization, pumping_time
+:END:
+
+#+begin_quote
+/The purpose of the optical pumping method is to produce a
+macroscopic orientation of atomic angular momentum, starting
+from a random, thermal equilibrium distribution./
+--- Alfred Kastler, Nobel Lecture, 1966
+#+end_quote
+
+*** Why This Lesson
+
+Optical pumping is how the magnetometer is /prepared/. Without it,
+the spin states are equally populated (at room temperature,
+$k_BT \gg g_F \mu_B B$), the net magnetization is negligible, and
+there is no signal. Optical pumping creates the $M_0$ that appears
+in Lesson 00's Bloch equations.
+
+This is the first lesson where we confront the real atom --- not a
+two-level abstraction but $^{87}$Rb with its hyperfine structure,
+Zeeman sublevels, and selection rules.
+
+*** Physics Progression
+
+1. *The multi-level atom: hyperfine structure of $^{87}$Rb*
+   - Nuclear spin $I = 3/2$, electron spin $S = 1/2$ for ground state
+   - Hyperfine coupling: $\mathbf{F} = \mathbf{I} + \mathbf{J}$
+   - Ground state: $F = 1$ (3 sublevels) and $F = 2$ (5 sublevels)
+   - Excited state ($5P_{3/2}$): $F' = 0, 1, 2, 3$
+   - Energy scales: hyperfine splitting $\sim 6.8$ GHz (ground state),
+     Zeeman splitting $\sim 700$ kHz/G
+
+2. *Circularly polarized light and selection rules*
+   - $\sigma^+$ light: $\Delta m_F = +1$
+   - Each absorption event pushes population toward higher $m_F$
+   - Spontaneous emission: $\Delta m_F = 0, \pm 1$ (isotropic)
+   - Net effect: population accumulates in the stretched state
+     $|F=2, m_F = +2\rangle$
+
+3. *Rate equations: population dynamics*
+   - $\dot{P}_{m_F} = \sum_{m_F'} (R_{m_F' \to m_F} P_{m_F'} - R_{m_F \to m_F'} P_{m_F})$
+   - Pumping rates $R \propto |C_{m_F, m_F'}|^2 \cdot I / I_\text{sat}$
+   - Clebsch-Gordan coefficients determine the branching ratios
+   - This is a system of coupled linear ODEs — the same =simulate=
+     structure as Lesson 00, but for N populations instead of 3 Bloch
+     components
+
+4. *Dark states*
+   - The stretched state $|F=2, m_F=+2\rangle$ with $\sigma^+$ light:
+     no transition to $F'=3, m_F'=+3$ exists (for D1 line); the atom
+     stops absorbing
+   - Coherent dark states (CPT): superpositions that decouple from
+     the light field
+   - Population trapping: why optical pumping to a dark state is
+     efficient
+
+5. *Repumping*
+   - Population in $F=1$ is "lost" to pumping on the $F=2$ transition
+   - Second laser on $F=1 \to F'=2$ recycles atoms back to $F=2$
+   - Without repumper: signal decays. With repumper: steady state.
+
+6. *Equilibrium polarization: the steady-state $M_0$*
+   - Balance: pumping rate (pushes toward $m_F = F$) vs relaxation
+     rate (randomises $m_F$)
+   - $M_0 = \langle F_z \rangle / F = f(\text{pump rate}, \text{relax rate})$
+   - This is the $M_0$ in the Bloch equations of Lesson 00 — now
+     derived from microscopic physics
+
+7. *Optical pumping time*
+   - $\tau_\text{pump} \sim 1/(\Gamma \cdot s)$ where $s$ is the
+     saturation parameter
+   - For Rb: $\tau_\text{pump} \sim 10\text{--}100\,\mu$s depending
+     on intensity
+   - The competition: $\tau_\text{pump}$ vs $T_1$. If pumping is
+     slower than relaxation, polarization is poor.
+
+*** Key Equations
+
+| Equation | Physical meaning |
+|----------+------------------|
+| $\dot{P}_{m_F} = \sum (R_{in} - R_{out})$ | Rate equation for sublevel populations |
+| $R \propto \vert C_{m_F, m_F'}\vert^2 I/I_\text{sat}$ | Pumping rate (proportional to CG coefficients × intensity) |
+| $M_0 = \langle F_z \rangle / F$ | Equilibrium polarization |
+| $\tau_\text{pump} \sim 1/(\Gamma \cdot s)$ | Optical pumping time |
+
+*** Verification Claims
+
+- "Rate equations conserve total population: $\sum P_{m_F} = 1$"
+- "Pumping with $\sigma^+$ drives population toward $m_F = +F$"
+- "Equilibrium polarization increases monotonically with pump rate"
+- "Repumping prevents population loss to $F=1$"
+
+*** Cadenzas
+
+- =hyperfine-structure-alkali=: The hierarchy of atomic energy scales
+  (fine structure → hyperfine → Zeeman). How to read a Grotrian
+  diagram.
+- =clebsch-gordan-coefficients=: What they are, where they come from,
+  how to look them up. Enough to compute branching ratios.
+- =rate-vs-master-equation=: When rate equations suffice (incoherent
+  processes dominate) and when you need the full Lindblad master
+  equation (coherent effects matter).
+
+** Lesson 04 — Magnetic Resonance
+:PROPERTIES:
+:STATUS: PLANNED
+:FILE: lessons/04-magnetic-resonance/concept.org
+:DEPENDS: 00, 01, 02, 03
+:EXPORTS: ZeemanSplitting, ResonanceCondition, BellBloomScheme, FreeInductionDecay, DispersiveSignal, larmor_to_field
+:END:
+
+#+begin_quote
+/I am what is mine. Personality is the original personal property./
+--- Norman O. Brown
+
+/The Larmor frequency is the atom's personal property. It tells you
+the magnetic field it feels, and no other./
+--- (the physics, paraphrased)
+#+end_quote
+
+*** Why This Lesson
+
+This is the lesson where the magnetometer /works/. The student learns
+how the Larmor precession frequency — established in Lesson 00 and
+underpinned by the angular momentum algebra of Lesson 01 — becomes a
+measurement of the magnetic field. The Bell-Bloom scheme, which is the
+specific technique used in Saikat's magnetometer, is developed here.
+
+*** Physics Progression
+
+1. *Zeeman splitting*
+   - In weak field: $E_{m_F} = g_F \mu_B B m_F$ (linear Zeeman)
+   - Level spacing: $\Delta E = g_F \mu_B B = \hbar \omega_L$
+   - For $^{87}$Rb $F=2$: $g_F \approx 1/2$, so
+     $\omega_L / 2\pi \approx 7\,\text{Hz/nT}$
+   - This is the conversion factor that appears in the UQSC prototype
+
+2. *The resonance condition*
+   - An oscillating field at frequency $\omega$ near $\omega_L$ drives
+     transitions between Zeeman sublevels
+   - On resonance ($\omega = \omega_L$): maximum transition rate
+   - Off resonance: reduced rate, oscillation at
+     $\sqrt{(\omega - \omega_L)^2 + \Omega_\text{rf}^2}$
+   - $\omega_L = \gamma |B|$ is the /fundamental equation of
+     magnetometry/
+
+3. *rf-driven transitions: Rabi oscillations in the Zeeman manifold*
+   - Same mathematics as Lesson 02, but between $m_F$ and $m_F \pm 1$
+     instead of ground and excited states
+   - Rotating frame: the Bloch equations in a frame rotating at
+     $\omega$, with detuning $\delta = \omega - \omega_L$
+   - On resonance in the rotating frame: pure nutation about $B_1$
+
+4. *The Bell-Bloom scheme*
+   - Modulated optical pumping: the pump beam is amplitude-modulated
+     at a frequency near $\omega_L$
+   - Each pump pulse creates a burst of transverse magnetization
+   - If the modulation frequency matches $\omega_L$, successive pulses
+     add coherently → large steady-state oscillation
+   - If it doesn't match: destructive interference → small signal
+   - The signal amplitude as a function of modulation frequency → the
+     magnetic resonance lineshape
+
+5. *Free induction decay (FID)*
+   - After a single pump pulse, the transverse magnetization
+     oscillates at $\omega_L$ and decays with $T_2$
+   - This is the transient signal from Lesson 00, now in context
+   - FFT of the FID → the Larmor frequency → the magnetic field
+
+6. *Continuous-wave resonance: the lineshape*
+   - Absorptive (Lorentzian) component: proportional to power absorbed
+   - Dispersive component: proportional to $\delta / (\delta^2 + \gamma^2)$
+   - The dispersive signal crosses zero at resonance with a steep
+     slope — /this is the error signal/
+
+7. *The dispersive signal as an error signal: DAVLL physics*
+   - In DAVLL: Zeeman-split absorption produces a differential signal
+     between $\sigma^+$ and $\sigma^-$ components
+   - This differential signal is dispersive: zero at resonance,
+     positive on one side, negative on the other
+   - Feed it to a PID → the laser stays locked to the atomic
+     resonance
+   - This is the physics behind RP1 in the UQSC prototype
+
+*** Key Equations
+
+| Equation | Physical meaning |
+|----------+------------------|
+| $E_{m_F} = g_F \mu_B B m_F$ | Linear Zeeman splitting |
+| $\omega_L = \gamma \vert B \vert$ | Larmor frequency (the measurement equation) |
+| $B = f_L / (\gamma/2\pi)$ | Field from Larmor frequency |
+| $\chi(\delta) \propto \frac{\gamma}{\delta^2 + \gamma^2} + i\frac{\delta}{\delta^2 + \gamma^2}$ | Complex susceptibility (absorptive + dispersive) |
+
+*** Verification Claims
+
+- "Larmor frequency matches $\gamma |B|$ to numerical precision"
+- "Bell-Bloom signal amplitude peaks at $\omega_\text{mod} = \omega_L$"
+- "FID frequency extracted by FFT agrees with $\omega_L$"
+- "Dispersive signal crosses zero at resonance"
+- "DAVLL error signal has correct sign for negative feedback"
+
+** Lesson 05 — Noise and Sensitivity Limits
+:PROPERTIES:
+:STATUS: PLANNED
+:FILE: lessons/05-noise-sensitivity/concept.org
+:DEPENDS: 00, 01, 03, 04
+:EXPORTS: ShotNoise, JohnsonNoise, QuantumProjectionNoise, CramerRaoBound, AllanDeviation, noise_budget
+:END:
+
+#+begin_quote
+/Noise is the body of the signal. Without it, you are hearing ghosts./
+--- (paraphrasing Wiener)
+#+end_quote
+
+*** Why This Lesson
+
+Before the student can process signals (Lesson 06) or design
+estimators (Lesson 07), they must understand /what noise is/ and /why
+there are fundamental limits to measurement precision/. This lesson
+is the bridge between physics (what the sensor does) and engineering
+(what we do about it).
+
+The Cramér-Rao bound — the speed limit of measurement — threads
+through the rest of the curriculum.
+
+*** Physics Progression
+
+1. *Statistical mechanics of fluctuations*
+   - Fluctuation-dissipation theorem: any system that dissipates
+     energy also fluctuates. Landau-style derivation from the
+     partition function.
+   - The connection: a resistor that produces Johnson noise is the
+     /same/ dissipation that damps the signal
+
+2. *Shot noise*: $\delta N = \sqrt{N}$
+   - Poisson statistics of photon counting
+   - For $N$ detected photons: $\text{SNR} = \sqrt{N}$
+   - Optical power → photon rate → shot noise floor
+   - This sets the /photon-limited/ sensitivity of the readout
+
+3. *Johnson-Nyquist noise*: $v_n = \sqrt{4 k_B T R \Delta f}$
+   - Thermal fluctuations in the electronics
+   - Voltage noise spectral density: $S_v = 4 k_B T R$
+   - Dominates at low frequencies in transimpedance amplifiers
+
+4. *Quantum projection noise*
+   - Fundamental quantum limit for $N$ spin-½ particles:
+     $\delta B = \frac{1}{\gamma \sqrt{N T_2 t}}$
+   - Origin: the uncertainty principle for angular momentum
+     measurements. You cannot know $J_z$ perfectly and also have
+     coherence in $J_x, J_y$.
+   - The /standard quantum limit/ (SQL) for atomic magnetometry
+   - For Rb: $N \sim 10^{10}$ atoms, $T_2 \sim 10$ ms → achievable
+     sensitivities in the fT/$\sqrt{\text{Hz}}$ range
+
+5. *Spin-exchange broadening*
+   - Atom-atom collisions that randomize the spin direction → $T_2$
+     broadening → worse sensitivity
+   - Spin-exchange rate: $\propto n \sigma v_\text{th}$ (density ×
+     cross-section × thermal velocity)
+   - The nemesis of high-density vapor cells
+
+6. *The SERF regime*
+   - At zero field: spin-exchange collisions become spin-preserving
+     (technically: $\omega_L T_\text{SE} \ll 1$)
+   - $T_2$ increases dramatically → sensitivity improves by orders
+     of magnitude
+   - SERF magnetometers: sub-fT/$\sqrt{\text{Hz}}$, the most
+     sensitive magnetometers in existence
+
+7. *The Cramér-Rao bound and Fisher information*
+   - The estimation problem: given noisy data $y$, estimate $B$
+   - Fisher information: $\mathcal{I}(B) = E\left[\left(\frac{\partial \ln p(y|B)}{\partial B}\right)^2\right]$
+   - Cramér-Rao inequality: $\text{Var}(\hat{B}) \geq 1/\mathcal{I}(B)$
+   - Physical meaning: the curvature of the likelihood tells you how
+     distinguishable nearby field values are
+   - Connection to quantum mechanics: quantum Fisher information
+     bounds what /any/ measurement can achieve
+
+8. *Allan deviation*
+   - Characterising noise as a function of averaging time $\tau$
+   - White noise: $\sigma(\tau) \propto \tau^{-1/2}$
+   - Flicker (1/f) noise: $\sigma(\tau) \propto$ const
+   - Random walk: $\sigma(\tau) \propto \tau^{1/2}$
+   - The Allan deviation plot reveals the noise type and the optimal
+     averaging time
+
+9. *Noise budget: putting it all together*
+   - For a specific magnetometer (Bell-Bloom, $^{87}$Rb, room temp):
+     tabulate shot noise, Johnson noise, QPN, spin-exchange
+   - Which dominates? At what frequency? At what integration time?
+   - The total sensitivity: $\delta B_\text{total} = \sqrt{\sum_i (\delta B_i)^2}$
+
+*** Key Equations
+
+| Equation | Physical meaning |
+|----------+------------------|
+| $\delta N = \sqrt{N}$ | Shot noise (Poisson statistics) |
+| $S_v = 4 k_B T R$ | Johnson noise spectral density |
+| $\delta B = \frac{1}{\gamma\sqrt{N T_2 t}}$ | Quantum projection noise limit |
+| $\text{Var}(\hat{B}) \geq 1/\mathcal{I}(B)$ | Cramér-Rao bound |
+| $\sigma_y(\tau) = \sqrt{\frac{1}{2(M-1)} \sum (y_{i+1} - y_i)^2}$ | Allan deviation |
+
+*** Verification Claims
+
+- "Shot noise scales as $\sqrt{N}$: simulate Poisson counting, check"
+- "Quantum projection noise matches $1/(\gamma\sqrt{NT_2 t})$ for simulated spin ensemble"
+- "Allan deviation of white noise has slope $-1/2$ on log-log plot"
+- "Cramér-Rao bound achieved by maximum likelihood estimator on simulated Lorentzian line"
+
+** Lesson 06 — Signal Processing
+:PROPERTIES:
+:STATUS: PLANNED
+:FILE: lessons/06-signal-processing/concept.org
+:DEPENDS: 00, 04, 05
+:EXPORTS: LockInAmplifier, DigitalFilter, FFT, PSD, fir_filter, iir_filter, lock_in_detect, quadrature_demod
+:END:
+
+#+begin_quote
+/There is an essential difference between an analog signal
+processor, which is a physical system obeying the laws of physics,
+and a digital signal processor, which is a mathematical abstraction
+implemented in silicon. The analog processor cannot violate
+causality. The digital one can — it just looks into the future by
+buffering the past./
+#+end_quote
+
+*** Why This Lesson
+
+The magnetometer produces a signal: an oscillating voltage at the
+Larmor frequency, buried in noise. This lesson teaches the tools to
+extract it. Every block in the UQSC prototype's FPGA — IQ
+demodulator, PID, ASG, IIR filter — implements one of the
+mathematical operations taught here.
+
+*** Physics Progression
+
+1. *Sampling theory*
+   - Nyquist-Shannon: $f_s > 2 f_\text{max}$, or aliasing occurs
+   - Red Pitaya ADC: 125 MSPS, 14-bit → Nyquist at 62.5 MHz
+   - Larmor frequency at Earth's field: ~350 kHz → well within Nyquist
+   - Quantization noise: $\text{SNR}_\text{quant} = 6.02 N_\text{bits} + 1.76$ dB
+
+2. *Digital filtering*
+   - Convolution: $y[n] = \sum_k h[k] x[n-k]$
+   - FIR filters: finite impulse response, always stable, linear
+     phase available
+   - IIR filters: infinite impulse response, more efficient but can be
+     unstable. Butterworth, Chebyshev.
+   - Frequency response: $H(e^{j\omega})$, gain and phase plots
+   - Filter design as a pure function: coefficients → filter → output
+
+3. *Lock-in detection: the heart of the magnetometer*
+   - Multiply signal by reference: $s(t) \cos(\omega_\text{ref} t)$
+   - Low-pass filter → extracts the component at $\omega_\text{ref}$
+   - Result: amplitude $\times \cos(\phi)$ where $\phi$ is the phase
+     difference
+   - This is how the FPGA IQ module works
+
+4. *Quadrature demodulation*
+   - Two references: $\cos(\omega t)$ and $\sin(\omega t)$
+   - Two outputs: $X = A\cos\phi$, $Y = A\sin\phi$
+   - Amplitude: $A = \sqrt{X^2 + Y^2}$
+   - Phase: $\phi = \arctan(Y/X)$
+   - The full complex demodulation: $Z = X + iY = A e^{i\phi}$
+
+5. *Spectral analysis*
+   - DFT/FFT: $X[k] = \sum_n x[n] e^{-2\pi i kn/N}$
+   - Power spectral density: $S_{xx}(f) = |X(f)|^2 / T$
+   - Windowing: why rectangular is bad (spectral leakage), Hann, Hamming
+   - Welch's method: overlapping segments for smooth PSD estimation
+
+6. *Lock-in as optimal matched filter*
+   - The lock-in amplifier extracts the signal at one frequency —
+     exactly what a matched filter does when the signal model is a
+     sinusoid at known frequency
+   - SNR improvement: $\propto \sqrt{T_\text{integration}/T_\text{period}}$
+   - Preview of Lesson 07: the Kalman filter as a generalisation of
+     matched filtering to time-varying signals
+
+*** Verification Claims
+
+- "FIR filter frequency response matches design specification"
+- "Lock-in detection recovers amplitude and phase of buried sinusoid to within noise floor"
+- "FFT of simulated FID recovers Larmor frequency to within $1/T$ resolution"
+- "PSD of white noise is flat; PSD of 1/f noise has slope $-1$"
+
+** Lesson 07 — State Estimation
+:PROPERTIES:
+:STATUS: PLANNED
+:FILE: lessons/07-state-estimation/concept.org
+:DEPENDS: 05, 06
+:EXPORTS: KalmanFilter, ExtendedKF, ParticleFilter, kalman_predict, kalman_update, fisher_information_matrix
+:END:
+
+#+begin_quote
+/The Kalman filter does for estimation what PID does for control:
+it solves the boring 90% of the problem, so you can focus on the
+interesting 10%./
+#+end_quote
+
+*** Why This Lesson
+
+The signal processing of Lesson 06 extracts a measurement. But a
+single measurement is noisy. The magnetometer produces a /stream/ of
+measurements, and the magnetic field is a /time-varying/ quantity. We
+need an estimator that combines all past measurements optimally,
+accounting for the dynamics of the field and the statistics of the
+noise.
+
+This is the Kalman filter — and its nonlinear extensions. It is the
+"anumāna" (inference) engine of the magnetometer.
+
+*** Physics Progression
+
+1. *The estimation problem*
+   - Hidden state: $\mathbf{x}_k$ (the magnetic field and its
+     derivatives)
+   - Observations: $\mathbf{y}_k$ (the demodulated Larmor signal)
+   - Dynamics: $\mathbf{x}_{k+1} = \mathbf{A}\mathbf{x}_k + \mathbf{w}_k$
+     (field changes + process noise)
+   - Measurement: $\mathbf{y}_k = \mathbf{H}\mathbf{x}_k + \mathbf{v}_k$
+     (observation + measurement noise)
+
+2. *Maximum likelihood estimation*
+   - The likelihood function: $p(\mathbf{y}|\mathbf{x})$
+   - MLE: find $\hat{\mathbf{x}}$ that maximizes $p$
+   - For Gaussian noise: MLE = least squares
+   - Connection to Fisher information (Lesson 05): the curvature of
+     $\ln p$ at the MLE
+
+3. *The linear Kalman filter*
+   - Predict step: propagate state and covariance forward
+   - Update step: incorporate new measurement, weight by Kalman gain
+   - $K_k = P_k^- H^T (H P_k^- H^T + R)^{-1}$ (the Kalman gain)
+   - The filter is /optimal/ for linear Gaussian systems (minimum
+     variance unbiased estimator)
+   - Derivation: from Bayesian updating of Gaussians (Landau-style:
+     every step)
+
+4. *The extended Kalman filter (EKF)*
+   - Nonlinear dynamics: $\mathbf{x}_{k+1} = f(\mathbf{x}_k) + \mathbf{w}_k$
+   - Linearize around current estimate: $F_k = \partial f / \partial \mathbf{x}|_{\hat{\mathbf{x}}_k}$
+   - Same predict-update structure, but with Jacobians
+   - When the EKF fails: highly nonlinear systems, multi-modal
+     distributions
+
+5. *Particle filters*
+   - Represent the posterior $p(\mathbf{x}_k | \mathbf{y}_{1:k})$ as
+     a set of weighted particles
+   - No Gaussianity assumption, no linearization
+   - Predict: propagate each particle through the dynamics
+   - Update: reweight particles by likelihood of observation
+   - Resample: prune unlikely particles, duplicate likely ones
+   - When to use: multi-modal, highly nonlinear, non-Gaussian
+
+6. *Sensor fusion*
+   - Multiple sensors: magnetometer + IMU + altimeter (connection to
+     MagNav document)
+   - Each sensor provides a measurement equation
+   - The Kalman filter combines them optimally
+   - Loose coupling vs tight coupling
+
+7. *Information form and Fisher information matrix*
+   - The Kalman filter covariance $P_k$ is the inverse of the
+     information matrix
+   - Connection to Cramér-Rao bound (Lesson 05): the filter
+     covariance converges to the Cramér-Rao bound
+   - The filter is not just an algorithm — it is an /information
+     processing/ system
+
+*** Verification Claims
+
+- "Kalman filter converges to true field in linear Gaussian simulation"
+- "EKF tracks sinusoidally varying field with bounded error"
+- "Particle filter captures bimodal distribution (two field hypotheses)"
+- "Filter covariance converges to Cramér-Rao bound for stationary field"
+- "Fusing two sensors gives lower variance than either alone"
+
+** Lesson 08 — Feedback and Control
+:PROPERTIES:
+:STATUS: PLANNED
+:FILE: lessons/08-feedback-control/concept.org
+:DEPENDS: 04, 05, 06, 07
+:EXPORTS: PIDController, TransferFunction, BodePlot, pid_step, bode_analysis, stability_margin, ziegler_nichols
+:END:
+
+#+begin_quote
+/A feedback system is an argument with itself.
+Good design ensures it's a productive argument./
+#+end_quote
+
+*** Why This Lesson
+
+The magnetometer must /hold lock/ — keep the laser on resonance, keep
+the PLL tracking the Larmor frequency, reject disturbances from
+vibration, temperature drift, ambient field changes. This is feedback
+control.
+
+Saikat's UQSC prototype says "optimise PID gains" multiple times
+without guidance. This lesson fills that gap — from the physics of
+feedback to the practice of PID tuning.
+
+*** Physics Progression
+
+1. *The feedback loop*
+   - Reference → error → controller → plant → output → sensor → error
+   - Open-loop vs closed-loop: why feedback is necessary (the plant
+     drifts, the world changes)
+   - Negative feedback: the sign that ensures stability
+
+2. *PID controller*
+   - Proportional: reacts to current error. Proportional gain $K_p$.
+   - Integral: eliminates steady-state error. Integral gain $K_i$.
+   - Derivative: anticipates future error. Derivative gain $K_d$.
+   - In the time domain: $u(t) = K_p e(t) + K_i \int e\,dt + K_d \dot{e}(t)$
+   - Physical meaning: P → spring, I → gravity (pulls to zero), D → dashpot
+
+3. *Transfer functions*
+   - The Laplace transform: $\mathcal{L}\{f(t)\} = F(s) = \int_0^\infty f(t) e^{-st} dt$
+   - Motivation: convolution → multiplication. Differential equations → algebra.
+   - The PID in the $s$-domain: $C(s) = K_p + K_i/s + K_d s$
+   - Plant transfer function: $G(s)$
+   - Closed-loop: $H(s) = \frac{C(s)G(s)}{1 + C(s)G(s)}$
+
+4. *Bode plots*
+   - $|H(j\omega)|$ and $\angle H(j\omega)$ vs $\omega$
+   - Gain margin: how much gain you can add before instability
+   - Phase margin: how much phase lag you can tolerate
+   - A Bode plot is a /portrait of the feedback loop's character/
+
+5. *Stability*
+   - The closed-loop is stable iff all poles have $\text{Re}(s) < 0$
+   - Nyquist criterion: stability from the open-loop frequency response
+   - Physical intuition: if the loop has gain > 1 at the frequency
+     where phase = $-180°$, the feedback becomes /positive/ → oscillation
+
+6. *Loop shaping*
+   - Design the controller to meet bandwidth and stability specs
+   - Bandwidth: the frequency up to which the loop tracks changes
+   - Roll-off: the controller gain must decrease at high frequency
+     (noise amplification)
+   - Lead-lag compensation: trading bandwidth for stability
+
+7. *Anti-windup*
+   - The integral term accumulates error → if the actuator saturates
+     (DAC at max), the integral keeps growing → when the error
+     changes sign, the accumulated integral causes overshoot
+   - Anti-windup: clamp the integral when the actuator saturates
+   - This is the #1 practical PID bug, and Saikat's doc doesn't mention it
+
+8. *PID tuning: Ziegler-Nichols and beyond*
+   - Z-N ultimate gain method: increase $K_p$ until oscillation,
+     measure period → compute $K_p, K_i, K_d$
+   - Z-N step response method: from the plant's open-loop step response
+   - Relay auto-tuning: automated Z-N
+   - Beyond Z-N: Cohen-Coon, AMIGO, model-based tuning
+
+9. *Feedback as estimation: the control-estimation duality*
+   - The Kalman filter (Lesson 07) and the LQR controller are /duals/:
+     same Riccati equation, transposed
+   - The filter estimates the state; the controller decides the action
+   - This duality is not an accident — it is the mathematical structure
+     of optimal feedback under uncertainty
+
+*** Verification Claims
+
+- "PID holds laser lock under simulated field step disturbance"
+- "Bode plot phase margin > 45° for tuned controller"
+- "Anti-windup prevents integral overshoot when DAC saturates"
+- "Ziegler-Nichols tuning from simulated plant matches analytical prediction"
+
+** Lesson 09 — The Complete Magnetometer (Capstone)
+:PROPERTIES:
+:STATUS: PLANNED
+:FILE: lessons/09-complete-magnetometer/concept.org
+:DEPENDS: 00, 01, 02, 03, 04, 05, 06, 07, 08
+:EXPORTS: Magnetometer, simulate_full_chain, sensitivity_curve, compare_to_uqsc
+:END:
+
+#+begin_quote
+/Dheere dheere re mana, dheere sab kuch hoye/
+/Maali seeche sau ghada, ritu aaye phal hoye/
+
+/Slowly, slowly, O my mind --- slowly everything happens.
+The gardener may pour a hundred buckets, but fruit comes only in
+its season./
+--- Kabir
+#+end_quote
+
+*** Why This Lesson
+
+The season has come. Every previous lesson contributed a module. This
+lesson /composes/ them into a complete, functional digital twin of a
+Bell-Bloom atomic magnetometer.
+
+The student who completes this lesson can open Saikat's UQSC
+prototype document and understand every architectural choice --- not
+because they were told, but because they built the physics.
+
+*** Content
+
+1. *The full signal chain as functional composition*
+   - Optical pumping (Lesson 03) → Bloch dynamics (Lesson 00, 04) →
+     Optical readout (Lesson 02) → Lock-in demodulation (Lesson 06) →
+     Kalman estimation (Lesson 07) → PID feedback (Lesson 08)
+   - Each stage is a module from a previous lesson
+   - The composition is /literal/: function → function → function
+   - In Haskell: a chain of =State= transformations
+   - In C++: a pipeline of header-only pure functions
+
+2. *End-to-end simulation*
+   - Inject a realistic magnetic field: Earth's field (50 μT) +
+     slow drift (temperature, geology) + fast signal (brain field:
+     100 fT @ 10 Hz) + noise (all sources from Lesson 05)
+   - Run the full pipeline: pump → precess → readout → demodulate →
+     estimate → control
+   - Extract the brain signal from the estimated field
+   - Verify: is the extracted signal within the Cramér-Rao bound?
+
+3. *Performance characterization*
+   - Sensitivity: $\delta B(\tau)$ as Allan deviation
+   - Bandwidth: from the Bode plot of the closed loop
+   - Dynamic range: from DAC/ADC bit depth and feedback gain
+   - Slew rate: maximum $dB/dt$ the loop can track
+
+4. *Mapping to the UQSC architecture*
+   - Each stage of the digital twin → the corresponding Red Pitaya
+     subsystem
+   - Each mathematical operation → the FPGA module that implements it
+   - The pure core (this digital twin) vs the effectful shell
+     (Saikat's hardware)
+   - The student now has the /physics/ behind every line of the
+     UQSC prototype
+
+5. *What the digital twin can do that the real instrument cannot*
+   - Perfect knowledge of the "true" field → validation of estimator
+   - Turn noise sources on/off individually → identify bottlenecks
+   - Sweep parameters (temperature, atom density, laser power) →
+     optimise before building
+   - This is Markram's digital twin methodology for instruments
+
+*** Verification Claims
+
+- "Complete magnetometer simulation matches analytical sensitivity curve"
+- "Feedback loop holds lock under realistic field perturbations"
+- "Extracted brain signal matches injected signal within Cramér-Rao bound"
+- "All three language implementations agree on sensitivity to within floating-point tolerance"
+
+* Part II: The Technology Bridge
+
+These lessons connect the physics (Part I) to the hardware (UQSC
+prototype). They are not pure physics lessons --- they are /applied/
+lessons that show how the mathematics maps to silicon and optics.
+
+** Lesson 10 — From Equations to Hardware
+:PROPERTIES:
+:STATUS: PLANNED
+:FILE: lessons/10-equations-to-hardware/concept.org
+:DEPENDS: 06, 09
+:EXPORTS: ADC_model, DAC_model, quantization_noise, latency_model
+:END:
+
+*** Content
+
+1. *The effectful shell*: what changes when equations run on hardware
+   instead of in simulation
+2. *DAC/ADC*: quantization, sample-and-hold, effective bits, INL/DNL
+3. *Sampling theory revisited*: anti-alias filtering, oversampling, decimation
+4. *FPGA vs CPU*: why the PID must run on fabric, not on ARM.
+   Latency budgets. The cardinal rule from the UQSC prototype.
+5. *The Red Pitaya STEMlab 125-14*: Zynq-7010 architecture,
+   125 MSPS ADC/DAC, the FPGA resources available
+6. *PyRPL/Linien*: how the FPGA bitstream is configured from Python.
+   The SCPI interface. What runs where.
+
+** Lesson 11 — Laser Frequency Stabilization
+:PROPERTIES:
+:STATUS: PLANNED
+:FILE: lessons/11-laser-stabilization/concept.org
+:DEPENDS: 02, 04, 08, 10
+:EXPORTS: DAVLL_model, servo_design, capture_range, lock_point
+:END:
+
+*** Content
+
+1. *Why laser stability matters*: frequency noise → amplitude noise
+   via the atomic resonance slope
+2. *DAVLL physics*: Zeeman splitting in the vapor cell with a bias
+   field, differential absorption of $\sigma^+$ and $\sigma^-$,
+   the dispersive error signal
+3. *Servo design*: the laser frequency is the "plant", the PZT/current
+   is the actuator, the DAVLL error signal is the sensor
+4. *Capture range and lock point*: how far off-resonance can the
+   servo pull back? What determines the lock point?
+5. *Temperature effects*: cell temperature → pressure broadening →
+   linewidth → slope → servo gain. The UQSC prototype's concern about
+   "tens of MHz/K" drift.
+6. *Autolock*: Linien's approach to automated locking
+
+** Lesson 12 — The Phase-Locked Loop
+:PROPERTIES:
+:STATUS: PLANNED
+:FILE: lessons/12-phase-locked-loop/concept.org
+:DEPENDS: 04, 06, 08, 10
+:EXPORTS: PLL_model, DDS_driver, phase_detector, loop_filter, larmor_tracker
+:END:
+
+*** Content
+
+1. *PLL fundamentals*: phase detector → loop filter → VCO → feedback
+2. *The PLL as a feedback system*: transfer function, bandwidth,
+   lock range, capture range
+3. *Phase detector*: analog (mixer) vs digital (XOR, PFD). The FPGA
+   IQ demodulator as a phase detector.
+4. *The DDS (AD9833)*: direct digital synthesis. Frequency word →
+   phase accumulator → sine lookup → analog output. 0.1 Hz resolution
+   with 25 MHz clock.
+5. *CORDIC*: the algorithm for computing sine/cosine on FPGA without
+   multipliers. How the Red Pitaya does phase estimation.
+6. *The Larmor tracking PLL*: the DDS output frequency tracks the
+   Larmor frequency. The phase detector compares the DDS output to
+   the demodulated magnetometer signal. The loop filter (PID) adjusts
+   the DDS frequency. This is RP2 in the UQSC prototype.
+7. *Lock dynamics*: what happens when the field changes. Pull-in range
+   vs lock range. The PLL bandwidth determines the magnetometer's
+   tracking bandwidth.
+
+* Dependency Graph
+
+#+begin_example
+                    ┌─────────────────────────────────┐
+                    │                                  │
+00 Bloch ──────┬── 01 Spin ── 02 Light ── 03 Pumping ─┤
+               │                                       │
+               └─────────────── 04 Resonance ──────────┘
+                                    │
+                            05 Noise ── 06 Signal ── 07 Estimation
+                                                          │
+                                    08 Control ───────────┘
+                                        │
+                                    09 Complete ─┬── 10 Hardware
+                                                 ├── 11 DAVLL
+                                                 └── 12 PLL
+#+end_example
+
+* Cross-References to Resources
+
+| UQSC Section | Curriculum Lesson(s) |
+|--------------+----------------------|
+| DAVLL laser locking | 02 (light), 04 (resonance), 08 (control), 11 (DAVLL) |
+| Coil control + PLL | 04 (resonance), 06 (signal), 08 (control), 12 (PLL) |
+| AD9833 DDS | 12 (PLL) |
+| PyRPL PID/IQ modules | 06 (signal), 08 (control), 10 (hardware) |
+| Larmor frequency conversion | 04 (resonance) |
+| "Optimize PID gains" | 08 (control) — Ziegler-Nichols and beyond |
+| FPGA latency hierarchy | 10 (hardware) |
+
+| MagNav Section | Curriculum Lesson(s) |
+|----------------+----------------------|
+| Kalman/EKF for sensor fusion | 07 (estimation) |
+| Magnetometer technologies (OPM) | 03 (pumping), 04 (resonance), 05 (noise) |
+| Signal denoising | 06 (signal) |
+| Aeromagnetic compensation | 07 (estimation), 08 (control) |
+
+| Lab Proposal Module | Curriculum Lesson(s) |
+|---------------------+----------------------|
+| Module 2: Magnetic resonance (NMR/ESR) | 01 (spin), 04 (resonance) |
+| Module 4: Quantum sensing (MOT, SQUID) | 03 (pumping), 04 (resonance), 05 (noise) |
+| Bloch sphere and qubit manipulation | 00 (Bloch), 01 (spin) |
+
+* Development Order
+
+The lessons should be developed in numerical order (00 → 01 → 02 → ...),
+since each depends on its predecessors. Lesson 00 is complete.
+
+Within each lesson, the development order is:
+
+1. *The Physics section* — the mathematical content, with cadenzas
+2. *Python implementation* — interactive exploration
+3. *Haskell implementation* — executable specification
+4. *C++ implementation* — deployment code
+5. *Verification* — cross-language tests
+6. *Exercises* — leading to the next lesson
+
+Estimated effort per lesson: 1–2 working sessions (physics +
+implementations + verification).
+
+* What Success Looks Like
+
+A student who completes this curriculum can:
+
+1. Derive the Bloch equations from the density matrix formalism
+2. Explain why optical pumping creates a macroscopic magnetization
+3. Calculate the sensitivity of a Bell-Bloom magnetometer from first
+   principles
+4. Design a lock-in amplifier and explain why it works
+5. Implement a Kalman filter for magnetic field estimation
+6. Tune a PID controller using Ziegler-Nichols and explain the
+   stability margins
+7. Run the complete digital twin and interpret its output
+8. Read Saikat's UQSC prototype and understand every architectural
+   choice
+9. Walk into the lab and know /why/ each piece of equipment is there
+
+#+begin_quote
+/What I cannot create, I do not understand./
+--- Richard Feynman, last blackboard, February 1988
+#+end_quote

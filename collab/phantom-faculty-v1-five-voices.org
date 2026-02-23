@@ -1,0 +1,250 @@
+#+title: The Phantom Faculty: Agentic Pedagogy from the Great Physics Teachers
+#+subtitle: How AI agents can channel the teaching methods of Landau, Feynman, Thorne, and Susskind
+#+author: mu2tau & Claude
+#+date: February 2026
+
+#+begin_quote
+/The mediocre teacher tells. The good teacher explains. The superior
+teacher demonstrates. The great teacher inspires./
+--- William Arthur Ward
+#+end_quote
+
+* The Idea
+
+Imagine a physics department with five faculty members. Each is the best in the world at one aspect of teaching:
+
+- One never lets an equation appear without derivation.
+- One makes you /see/ the physics before you calculate it.
+- One performs the act of understanding in front of you, wrong turns and all.
+- One strips every lesson to the minimum honest path.
+- One insists you build it yourself, in code, and prove it works.
+
+No single human teacher embodies all five. The great ones have two or three of these qualities; the rest they compensate for with charisma or problem sets. A student who passes through all five offices emerges with something none of them could provide alone: understanding that is derived, visualised, discovered, compressed, and verified.
+
+These five teachers are not hypothetical. They are Landau, Thorne, Feynman, Susskind, and --- for the last --- us, the builders of MāyāPramāṇa. Their methods are distinct, documented, and decomposable. And an AI agent can channel them.
+
+Not /be/ them. Channel them. The way a musician channels a tradition without claiming to be its originator. The agent has read their books, absorbed their patterns, and can shift between their voices as the pedagogical moment demands. This is not imitation. It is composition.
+
+* Why This Is Not EdTech
+
+The standard vision of "AI in education" is a tutor that answers questions, adapts to the student's pace, and provides hints when they're stuck. This is useful. It is also shallow. It treats the teacher as an information-delivery mechanism whose only variable is bandwidth.
+
+The great physics teachers are not bandwidth optimisers. They are /epistemological artists/. Each has a distinctive theory of how understanding works and a method tuned to that theory:
+
+- Landau believes understanding is /logical reconstruction/. If you can derive it from axioms, you understand it.
+- Thorne believes understanding is /geometric perception/. If you can see it --- as a picture, a limiting case, a cross-domain pattern --- you understand it.
+- Feynman believes understanding is /generative encounter/. If you can re-derive it from scratch, following the confusions and resolutions, you understand it.
+- Susskind believes understanding is /compression/. If you can identify the minimum structure that produces the physics, you understand it.
+- The Manifesto (our own voice) believes understanding is /construction/. If you can build it --- in code, in three languages, with tests that are physics claims --- you understand it.
+
+These are not five ways of saying the same thing. They are five /different claims about cognition/. A student who has only derived (Landau) but never built (Manifesto) has a different kind of understanding than one who has built but never derived. Complete understanding requires all five modes.
+
+An AI agent that can shift between these modes --- not randomly, but /in response to the pedagogical moment/ --- is doing something no textbook and no single human teacher can do. It is running a department of one.
+
+* The Five Voices
+
+** Landau: The Derivation
+
+#+begin_quote
+In the Landau and Lifshitz Course of Theoretical Physics, every result is derived. No equation falls from the sky. This is not pedantry --- it is a claim that physics is a deductive science, and that understanding means being able to reconstruct the deduction.
+#+end_quote
+
+*** The method
+
+Start from established ground --- an axiom, a previous result, a physical argument that the student has already accepted. Proceed by logical steps, each justified. Arrive at the result. The student has not been told the answer; they have watched it /emerge/.
+
+*** What it demands of the agent
+
+The agent must know the dependency graph of results. It must never invoke a theorem the student hasn't seen. It must be willing to spend three paragraphs on a derivation that a textbook dispatches in one line with "it can be shown that." The Landau voice never says "it can be shown that."
+
+*** The test
+
+Can the student, given the starting point, reproduce the derivation on a blank page?
+
+*** Where it appears in MāyāPramāṇa
+
+The core physics progression of each lesson --- the numbered sections where one result leads to the next. The Bloch equations from $d\mathbf{M}/dt$. Quantization forced by the ladder algebra. The Cramér-Rao bound from the curvature of the log-likelihood. The Kalman filter from Bayesian updating of Gaussians.
+
+*** The limitation
+
+Derivation without intuition is algebra. The student can reproduce the steps without understanding why they matter. Landau's Course is famously difficult not because the derivations are wrong but because they are /unmotivated/. The student asks "why are we doing this?" and Landau answers "because the algebra requires it." This is where Thorne and Feynman intervene.
+
+** Thorne: The Geometric Intuition
+
+#+begin_quote
+Kip Thorne's Modern Classical Physics demonstrates that physical intuition can be taught. Not as a gift some students have and others lack, but as a skill --- the skill of seeing structure before computing it.
+#+end_quote
+
+*** The method
+
+Before computing, draw. Before drawing, ask: what happens in the limit? What does this look like in phase space? What other system has this same structure? The picture comes first; the algebra confirms what the picture suggested.
+
+*** What it demands of the agent
+
+The agent must generate visualisations --- not as decoration but as /arguments/. The Bloch sphere is not an illustration of the Bloch equations; it is the geometric arena in which spin dynamics happens. The Bode plot is not a summary of the transfer function; it is a portrait of the feedback loop's character. The agent must also maintain a map of cross-domain connections: the same Bloch equations in NMR and atomic magnetometry, the same Kalman filter in magnetometry and navigation.
+
+*** The test
+
+Can the student draw a picture that captures the essential physics, without writing an equation?
+
+*** Where it appears in MāyāPramāṇa
+
+The Bloch sphere visualisation in Lesson 00. The avoided crossing diagram in Lesson 02. The dispersive lineshape sketch in Lesson 04 ("see why it's an error signal"). The Allan deviation plot in Lesson 05 ("the slope tells you the physics"). The Bode plot in Lesson 08 ("gain margin and phase margin as geometric distances from instability").
+
+*** The limitation
+
+Pictures can mislead. The Bloch sphere is exact for spin-½ but breaks down for higher spins. Phase-space intuition from classical mechanics does not transfer cleanly to Hilbert space. The agent must know when a visualisation is an /analogy/ versus an /isomorphism/, and flag the difference. This is where Landau's rigour provides the corrective.
+
+** Feynman: The Encounter
+
+#+begin_quote
+Feynman didn't present polished derivations. He re-derived in front of you, including the wrong turns. "Let's try this... no, that doesn't work because... ah, but what if we..." The student watches understanding happen, not understanding reported.
+#+end_quote
+
+*** The method
+
+Start with the phenomenon in its full confusing glory. Don't sanitise it. Let the student feel the confusion that motivated the physics in the first place. Then work through it --- out loud, in real time, with false starts. The derivation is not a proof; it is a /narrative/ of discovery.
+
+Feynman insisted on multiple representations of the same truth. The path integral is not a replacement for the Schrödinger equation --- it is another way of seeing the same physics. What survives all representations is what you actually understand.
+
+And underneath everything: amazement. Feynman found the universe astonishing. Not as performance, but as genuine emotional response to the fact that nature works /this way/ and not some other way. The student who feels that Larmor precession is /remarkable/ --- that a spinning atom in a magnetic field acts as a clock --- will understand it more deeply than one who merely derives it correctly.
+
+*** What it demands of the agent
+
+This is where the LLM agent has a genuine --- perhaps unique --- advantage. It can /perform/ the process of understanding in dialogue, not just present the result. It can say: "My first instinct is to try X. But that fails because Y. Let me try Z instead." This is not theater; it is how reasoning actually works, and exposing it teaches the student something that a polished derivation hides.
+
+The agent must also resist the temptation to be authoritative. The Feynman voice says "I think this is right, and here's why" --- not "the answer is." It models the epistemic state of someone who /knows/ the physics but is reconstructing it live.
+
+The multiple-representation principle maps directly onto MāyāPramāṇa's three-language approach: Python, Haskell, and C++ are not three implementations of the same code. They are three /ways of expressing the same physics/. What is a fold in Haskell, a loop in C++, and a vectorised operation in NumPy is, underneath, the same time-stepping of the Bloch equations. The student who sees it in all three representations understands what none of the three can say alone.
+
+*** The test
+
+Is the student amazed?
+
+Less poetically: does the student feel that the result is /surprising and inevitable/ --- surprising that nature works this way, inevitable given the premises? This is the Feynman emotional register: wonder disciplined by logic.
+
+*** Where it appears in MāyāPramāṇa
+
+The opening of each lesson. Lesson 00 should not begin with "the Bloch equations are..." It should begin with a precessing spin --- a simulation, a visualisation, something the student can /watch/ --- and the question: "Why does it do that?" The formalism is the answer, not the starting point.
+
+The three-language implementations. The student writes the same physics in Python (exploratory, interactive), Haskell (algebraic, type-driven), and C++ (performant, explicit). Each representation reveals something the others obscure.
+
+The exercises that lead to the next lesson. Feynman believed the exercise was not a test of the lecture but a /bridge/ to the next question. Our exercises do this: Lesson 01 Exercise 3 (watch purity drop under Lindblad evolution) bridges to Lesson 02 (why does the environment cause decoherence? because of atom-light interaction).
+
+*** The limitation
+
+The wrong-turns-and-all approach can confuse a student who is already lost. If the student doesn't have the baseline (the Landau derivation, the Thorne picture), watching someone "figure it out" is bewildering rather than illuminating. Feynman's method works best /after/ the student has some grip on the material --- as reinforcement and deepening, not as first exposure. This is why Feynman appears in the curriculum not as the first voice but as the voice that makes the derived result /feel/ real.
+
+** Susskind: The Compression
+
+#+begin_quote
+Susskind's Theoretical Minimum is the most successful modern attempt to teach real physics --- not watered-down physics, not analogies-only physics --- to an audience that doesn't have a standard degree. His achievement is not simplification but compression: finding the shortest path through the mathematics that still reaches the physics honestly.
+#+end_quote
+
+*** The method
+
+Ask: what is the minimum mathematical structure the student needs to reach the physics? Introduce exactly that, and nothing more. Every tool earns its place by being /used/ in the same lecture that introduces it. If a concept is not needed for the next step, it is not in the main body --- it is an interlude for those who want more.
+
+The classical-before-quantum bridge is deliberate. Susskind spends real time on Poisson brackets not as review but as /setup/: the bracket $\{L_i, L_j\} = \epsilon_{ijk} L_k$ is the classical shadow of the commutator $[J_i, J_j] = i\hbar\epsilon_{ijk}J_k$. The student feels the bridge because both sides are developed.
+
+*** What it demands of the agent
+
+The agent must be a ruthless editor. For each section of a lesson, it must ask: if this were removed, would the student be unable to follow the next lesson? If yes, it stays. If no, it becomes a cadenza (our term for Susskind's interludes) or an exercise.
+
+This is harder than it sounds. The temptation is always to include more --- one more example, one more derivation, one more connection. Susskind's discipline is /exclusion/. The agent must model not just what the student needs to know but what the student /does not yet need to know/.
+
+*** The test
+
+If a section were removed, would the next lesson break?
+
+*** Where it appears in MāyāPramāṇa
+
+The cadenza system. Our cadenzas --- =stern-gerlach=, =su2-vs-so3=, =density-matrix-motivation=, =clebsch-gordan-coefficients=, =dipole-matrix-elements= --- are Susskind's interludes. They are necessary for some students and skippable for others. The main lesson body is self-contained without them.
+
+The dependency graph. Each lesson's =:DEPENDS:= property declares exactly which previous lessons are prerequisites. A student who has completed the dependencies has the minimum needed. This is Susskind's principle made structural.
+
+The classical-before-quantum bridge in Lesson 01: the physics progression starts with classical angular momentum (Poisson brackets, SO(3)), then crosses to quantum (commutators, SU(2)). The bridge is /felt/, not handwaved.
+
+*** The limitation
+
+Compression can become compression /away/ from depth. The minimum honest path to the Bloch equations does not include the fluctuation-dissipation theorem --- but the student who has seen the FDT understands /why/ there is noise in a deeper way than one who has only seen the Cramér-Rao bound. Susskind's method needs the cadenzas precisely because the minimum is not always sufficient for /full/ understanding. The minimum gets you through the door; what you do once inside requires the other voices.
+
+** The Manifesto: The Construction
+
+#+begin_quote
+/What I cannot create, I do not understand./
+--- Richard Feynman's last blackboard, February 1988
+
+/Landau derives. Thorne draws. Feynman discovers. Susskind compresses. We build./
+#+end_quote
+
+*** The method
+
+Every lesson produces running code in three languages. The code is not illustration --- it is /verification/. The student writes the Bloch equations in Python, Haskell, and C++. If all three agree with each other and with the analytical result, the physics is verified. If any disagree, either the code or the physics is wrong --- and finding out which is itself a lesson.
+
+Tests are physics claims. "Bloch norm conserved under pure precession" is a test name and a theorem. The test suite is a collection of verified physical properties. Running the tests is running the physics.
+
+*** What it demands of the agent
+
+The agent must be a builder, not just an explainer. It must produce code that compiles, runs, and passes tests. It must catch when the code disagrees with the derivation and diagnose whether the error is numerical, conceptual, or typographical.
+
+The three-language requirement forces the agent (and the student) to express the same physics in three different computational paradigms: imperative (C++), functional (Haskell), and exploratory (Python). This is the Feynman multiple-representation principle made concrete.
+
+*** The test
+
+Does the code pass the tests? Do all three languages agree? Does the student understand /why/ a test failure indicates a physics error and not just a bug?
+
+*** Where it appears in MāyāPramāṇa
+
+Everywhere. Every lesson has a Computational Content section. Every lesson has Verification Claims. The claims are both human-readable physics ("Longitudinal relaxation reaches $M_0$ within $e^{-5}$ after $5T_1$") and machine-runnable tests.
+
+*** The limitation
+Building can become rote implementation. A student who translates equations into code without understanding them has not learned physics --- they have learned to type. The code is only a proof of understanding if the student can explain /why/ the code works, not just /that/ it works. This is where Feynman's encounter and Landau's derivation provide the interpretive layer that naked code lacks.
+
+* The Composition
+
+** Five voices, one agent
+
+The five voices are not five modes the agent switches between at random. They compose in a specific order, driven by the pedagogical moment:
+
+#+begin_example
+Feynman opens:    "Look at this. What is happening? Why?"
+Thorne frames:    "Here is the picture. Here is the limit.
+                   Here is where you've seen this before."
+Landau derives:   "Now we prove it. Every step, from what
+                   you already know."
+Susskind edits:   "This is the core. That is a cadenza.
+                   You need this; you don't need that yet."
+The Manifesto
+  builds:         "Now write it. In three languages. Run the
+                   tests. Does the physics hold?"
+#+end_example
+
+This is not a rigid sequence. Within a single lesson, the voices interleave. A derivation (Landau) might pause for a limiting case (Thorne) or a "wait, what if we tried it this way?" (Feynman). But the large-scale arc of each lesson follows the sequence above: from encounter, through intuition and proof, to compression and construction.
+
+** The agent as department, not person
+
+A human teacher has a dominant voice. Landau's books are Landau's books --- you will not find Feynman's wrong turns there, and you will not find Thorne's pictures. The student must visit multiple teachers, read multiple books, attend multiple courses.
+
+The AI agent is not a person. It does not have a dominant voice. It has access to all five, and it can shift between them in a single paragraph --- /if/ it knows when each is needed. This is the compositional advantage.
+
+But it requires something that no current AI system does well: /pedagogical awareness/. The agent must sense not just what the student is asking but /what mode of understanding the student needs right now/. Does the student need a derivation (they're confused about the logic)? A picture (they can't see the structure)? An encounter (they're going through the motions without engagement)? A compression (they're drowning in detail)? A construction (they think they understand but haven't tested it)?
+
+In MāyāPramāṇa, we solve this partially by /designing it into the lesson structure/. Each lesson has a physics progression (Landau), a Bloch sphere or Bode plot (Thorne), an opening phenomenon (Feynman), cadenzas (Susskind), and implementations with tests (Manifesto). The agent follows the structure. But the deeper goal --- the agent that senses which voice the student needs --- remains open.
+
+** What none of them teach
+
+There is a sixth quality that no method captures, because it is not a method. It is /taste/. The ability to ask the right question. The sense that /this/ problem is worth a lifetime and /that/ one is a dead end. The feeling, before the calculation, that the answer will be beautiful.
+
+Landau had it. Feynman had it. Thorne and Susskind have it. No AI agent has it. The student must develop it themselves, through years of practice, through exposure to problems that resist easy solution, through the slow accumulation of physical intuition that no shortcut can replace.
+
+The phantom faculty can teach method. Taste remains the student's own journey.
+
+#+begin_quote
+/Dheere dheere re mana, dheere sab kuch hoye/
+/Maali seeche sau ghada, ritu aaye phal hoye/
+
+/Slowly, slowly, O my mind --- slowly everything happens./
+/The gardener may pour a hundred buckets, but the fruit comes only/ /in its season./
+--- Kabir
+#+end_quote

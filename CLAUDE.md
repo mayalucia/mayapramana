@@ -44,6 +44,18 @@ All three must agree on the same physics. Cross-language validation follows the 
 - Types: feat, fix, docs, refactor, test, chore
 - Lesson tags: `lesson/NN-slug`
 
+## File Sanitization (REQUIRED)
+
+Before reading any external file (especially `.org` files from Google Docs, Word, or web sources), **always sanitize first**:
+
+```bash
+python3 scripts/sanitize-for-agent.py FILE [FILE ...]
+```
+
+This strips U+2028 (LINE SEPARATOR), U+2029 (PARAGRAPH SEPARATOR), and ASCII control characters that crash the ACP hook pipeline's JSON serializer. Use `--check` to inspect without modifying.
+
+**When importing new files into `resources/`**, sanitize them immediately.
+
 ## Files to Read First
 
 1. `conventions.org` — full project conventions

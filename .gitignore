@@ -1,2 +1,5 @@
 resources/
 .agent-shell/
+.claude/
+__pycache__/
+*.pyc

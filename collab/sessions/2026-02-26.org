@@ -1,0 +1,250 @@
+#+title: Session — 2026-02-26
+#+subtitle: Phantom Faculty Prototype and the Path to a Browser App
+#+author: mu2tau & claude-opus-4.6
+#+date: 2026-02-26
+
+* Context
+
+Building the MayaPramana UQSC curriculum. The phantom faculty (five pedagogical modes) and MayaLoom (org-as-loom convention) exist as documents. Today we made them executable.
+
+* What We Built
+
+** MayaLoom cadenza spec revision
+
+Replaced vertical =:level= field (=undergrad=, =first-year-grad=,
+=researcher=) with lateral =:knows= / =:needs= pair. A collaborator
+crossing a domain gap, not ascending a hierarchy. Updated in:
+
+- =project/mayaloom.org= (parent repo)
+- =conventions.org=
+- All four cadenzas in =lessons/00-bloch-equations/concept.org=
+
+This is a small change with large implications: the cadenza metadata
+now encodes /what bridge to build/, not /what level to target/. An
+expanding agent reads =:knows= and =:needs= and generates the
+shortest path between them — the same cadenza serves different
+collaborators differently, depending on which side of the gap they
+stand on.
+
+** Five gptel-agent definitions
+
+=agents/phantom-faculty/{landau,thorne,feynman,susskind,construction}.md=
+
+Each is a gptel-agent-compatible markdown file with YAML frontmatter
+and a system prompt encoding:
+- Epistemological claim (what "understanding" means in this mode)
+- Method (how the mode operates)
+- Constraints (what it does NOT do — which other mode compensates)
+- Cadenza expansion protocol (how to read =:knows=, =:needs=, etc.)
+- Tone (voice, register, examples)
+
+Tool allocation: Landau/Thorne/Feynman/Susskind are read-only.
+Construction has full edit/write/bash — it builds and runs code.
+
+** Five cadenza expansions (worked example)
+
+=lessons/00-bloch-equations/cadenzas/bloch-sphere-geometry-{landau,thorne,feynman,susskind,construction}.org=
+
+The =bloch-sphere-geometry= cadenza from lesson 00, expanded in all
+five voices. The same gap (density matrix → Bloch sphere), five
+different bridges:
+
+| Mode         | Approach                                                                            | Length     |
+|--------------+-------------------------------------------------------------------------------------+------------|
+| Landau       | Parameter counting → Pauli basis → eigenvalue constraint                            | ~80 lines  |
+| Thorne       | Sphere picture, precession circles, relaxation spirals, cross-domain map            | ~90 lines  |
+| Feynman      | "Where did the 4th parameter go?" → θ/2 surprise → SU(2) → decoherence as shrinking | ~85 lines  |
+| Susskind     | Three facts. Done. Cross-references to other modes.                                 | ~40 lines  |
+| Construction | Python: ρ↔M round-trip, purity test, unitary norm conservation                      | ~100 lines |
+
+* Observations for a Browser App
+
+** What the current system requires
+
+- Emacs + org-babel + gptel-agent — high barrier to entry
+- Agent definitions are local markdown files loaded via elisp
+- Cadenza expansions are static org files — not generated on demand
+- No interactivity: the user cannot ask a follow-up question /within/ the cadenza context
+
+** What a browser app would need
+
+*** Core interaction: cadenza expansion on demand
+
+The user is reading a lesson (rendered org → HTML). They hit a cadenza
+block. Instead of a static expansion, they get:
+
+1. A choice of mode (or the system picks based on their profile)
+2. A generated expansion, in the chosen voice, using the cadenza metadata + surrounding lesson context
+3. The ability to ask follow-up questions /within that mode and context/
+
+This is the MayaLoom convention operating live: the org file is the warp, the agent generates the weft in real time, for this reader.
+
+*** The mode-switching problem
+
+In Emacs, switching modes means invoking a different gptel-agent. In a browser app, this is a UI element — a tab bar, a dropdown, a set of icons. The key insight: the mode is not a setting, it is a /response to the collaborator's need at this moment/. The app could:
+
+- Let the user choose explicitly ("show me the Landau derivation")
+- Suggest a mode based on their question ("you seem confused about the geometry — try the Thorne view?")
+- Compose modes in sequence (Feynman opens → Thorne frames → Landau derives — the canonical composition from the phantom faculty doc)
+
+*** Lesson rendering
+
+Org → HTML is well-solved (ox-hugo, pandoc, org-ruby). The hard part: preserving the semantic structure (headings, cadenza blocks, code blocks with language tags, LaTeX equations) in a form the frontend can operate on.
+
+Options:
+- ox-hugo exports to markdown → Hugo renders to HTML + JSON (existing MayaLucIA website pipeline)
+- Custom org parser that produces structured JSON (cadenzas as first-class objects, not just rendered blocks)
+- org-mode WASM (org-parser in browser — ambitious but possible)
+
+The structured JSON route is probably right: the frontend needs to know /where/ the cadenzas are, /what metadata they carry/, and /what lesson context surrounds them/ — not just rendered HTML.
+
+*** The agent backend
+
+The gptel-agent system prompts we wrote today are the prototype for API-side system prompts. The same structure:
+
+#+begin_example
+system_prompt = mode_prompt + cadenza_context + lesson_excerpt
+#+end_example
+
+Where:
+- =mode_prompt= is the agent definition (landau.md body, etc.)
+- =cadenza_context= is the cadenza block metadata (=:knows=, =:needs=, etc.)
+- =lesson_excerpt= is the surrounding section from concept.org
+
+This is what the backend sends to the LLM on each cadenza expansion request. The frontend handles rendering; the backend handles prompt assembly.
+
+*** State and continuity
+
+The MayaLoom "fabric" (session continuity) maps to:
+- User profile: what they know (accumulated =:knows= set)
+- Session state: which cadenzas they've expanded, in which mode
+- Follow-up context: conversation within a cadenza expansion
+
+This is standard chat-with-context, but scoped to a specific cadenza in a specific lesson. The scoping is what makes it different from generic "chat with a PDF."
+
+*** What is NOT needed (yet)
+
+- Code execution in the browser (Construction mode could just show code; running it is a separate problem)
+- Multi-user collaboration (start single-user)
+- Full org-babel integration (no tangling in browser)
+- Real-time editing of the org source (read-only for the lesson)
+
+* Design Questions (Open)
+
+1. *Lesson format*: do we parse org server-side and send structured JSON, or render to HTML and annotate with data attributes for cadenza locations?
+
+2. *Mode selection UI*: explicit tabs per mode, or a single "expand" button that asks the agent to pick the right mode?
+
+3. *Profile bootstrapping*: how does the app learn what the user =:knows=? A quiz? Self-declaration? Inference from their questions?
+
+4. *Scope*: MayaPramana only (quantum sensors), or generic MayaLoom (any org file with cadenzas)?
+
+5. *Deployment*: static site + API calls to Claude/OpenAI, or a more integrated backend?
+
+* Lesson 00 Rewrite (2026-02-27)
+
+** Problem
+
+The original =concept.org= opens with Larmor frequency, gyromagnetic
+ratio, density matrix parametrisation — Landau's order. A reader
+who doesn't already know why they should care about spin-½ density
+matrices has no foothold. The formalism arrives before the phenomenon.
+
+** What we did
+
+Wrote =concept-feynman.org= — the full lesson rewritten in Feynman's
+voice. Same physics, same code, same tests. Different order:
+
+| Original (Landau order) | Rewrite (Feynman order) |
+|-------------------------+-------------------------|
+| A Spin in a Field (Larmor, $\gamma_F$, hyperfine) | A Spinning Atom (watch it precess, 175 kHz, remarkable) |
+| The Bloch Vector (density matrix) | Why It Precesses (torque, cross product, Ehrenfest) |
+| The Equations of Motion | But It Doesn't Last ($T_1$, $T_2$, collisions) |
+| Why This Matters for Control | The Bloch Equations (precession + relaxation, phenomenological) |
+| Implementations | Why This Is a Magnetometer (pump/precess/read) |
+| Verification | Building the Equations (same code) |
+| Exercises | Does the Physics Hold? (same tests) |
+
+Key structural changes:
+- *Phenomenon first.* Opens with the precessing atom, not the formalism.
+- *Questions drive the exposition.* "Why does it precess?" → torque equation. "Why does it stop?" → relaxation. "Why is this useful?" → magnetometry.
+- *Bloch sphere deferred.* The density matrix / Bloch sphere geometry is now a cadenza, not a prerequisite. The main text works with $\mathbf{M}$ as a vector in $\mathbb{R}^3$ without needing $\rho$.
+- *Ehrenfest bridge.* The quantum-classical correspondence is presented as a surprise: the classical equation is exact for quantum expectation values. This is a Feynman move — wonder at the fact.
+- *New cadenzas.* =spin-in-a-field= (gyroscope analogy), =why-it-precesses= (Ehrenfest), =relaxation-physics= ($T_1$/$T_2$ mechanisms in vapour cells). The old cadenzas (=bloch-sphere-geometry=, =numerical-ode-methods=, =atomic-magnetometry=) are retained with updated =:assumes= fields.
+
+** Observation for the browser app
+
+The Feynman rewrite makes the lesson structure more natural for a
+linear reading experience — which is what a browser delivers. The
+original assumed an Emacs user who could jump to cadenzas at will.
+The rewrite has a narrative arc that works top-to-bottom.
+
+This suggests the browser app's default experience should be: read the
+lesson in Feynman order, with cadenzas available as "go deeper"
+expansions. The other modes (Landau derivation, Thorne geometry,
+Susskind compression, Construction code) are accessible but not the
+primary path.
+
+** Chalkboard figure
+
+Added =chalkboard_setup.png= — the opening illustration, drawn in
+Feynman's style (dark green board, chalk lines, side panel with
+square grid). Left panel: experimental setup (pump laser, Rb cell,
+probe, photodetector, B field). Right panel: free induction decay
+signal ($M_x(t)$ with $T_2$ envelope).
+
+Generated by =chalkboard_setup.py=. Requires matplotlib.
+
+Key design note: the figure appears /before/ any text about
+precession. The reader sees the experiment and its output first, then
+asks "why does it look like that?" — the Feynman move.
+
+For the browser app: this figure (or an interactive version) is the
+entry point. Click on the cell → atoms. Click on the signal → decay.
+Click on $\omega_L$ → precession frequency. The static chalkboard is
+a prototype for an interactive one.
+
+** Decision pending
+
+Which file becomes the canonical =concept.org=? Options:
+1. Replace the original with the Feynman version
+2. Keep both, link from one to the other
+3. Make the Feynman version canonical, archive the original
+
+* Chalkboard Python Package (2026-02-27)
+
+=python/mayapramana/chalkboard/= — reusable illustration toolkit.
+
+- =chalk.py= — two colour palettes (mark colours for board, stick
+  colours for tray), drawing helpers (=chalk_text=, =chalk_arrow=,
+  =chalk_line=, =chalk_box=, =chalk_circle=, =chalk_dust_particles=)
+- =board.py= — =Chalkboard= class: N sliding panels, permanent
+  square grid (axes-fraction coordinates, survives xlim/ylim changes),
+  wooden chalk tray with coloured sticks and felt duster, dark frame
+- =__init__.py= — exports =Chalkboard= and =chalk=
+
+Key design decisions:
+- *Grid only on graph panels.* Default: last panel only. Controlled
+  by =grid_panels= parameter. Schematic panels are clean.
+- *5:3 overall aspect ratio.* Wide like a real lecture board.
+- *Panel weights.* Default for 2 panels: =[3, 2]= — the drawing
+  area is 50% wider than the plot area.
+- *Stick vs mark colours.* The chalk sticks in the tray use saturated
+  body colours (=STICK_SET=); marks on the board use desaturated
+  versions (=CHALK_SET=).
+
+The =chalkboard_setup.py= illustration is now a source block in
+=concept-feynman.org= (=:results file :file chalkboard_setup.png
+:session none=). Evaluating it in org-babel regenerates the figure.
+
+For browsing: =org-toggle-inline-images= (=C-c C-x C-v=) renders
+figures in place. A dedicated figure browser (elisp, ~30 lines)
+deferred until we have figures across multiple lessons.
+
+* Next Steps
+
+- [ ] Decide which concept.org is canonical
+- [ ] Test the gptel agents live in Emacs against a real question
+- [ ] Begin lesson 01 (optical pumping) with cadenzas designed for all five modes from the start
+- [ ] Prototype: render one lesson as HTML with clickable cadenzas that call an API and return mode-specific expansions
+- [ ] Consider the org → structured JSON pipeline

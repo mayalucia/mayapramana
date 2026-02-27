@@ -1,5 +1,5 @@
 #+title: MāyāPramāṇa Curriculum
-#+subtitle: The Phantom Faculty Makes Everyone a Student Again
+#+subtitle: From Undergraduate Physics to a Universal Quantum Sensor Controller
 #+author: MāyāPramāṇa
 #+date: February 2026
 
@@ -10,36 +10,15 @@ The supreme task of the physicist is to arrive at those universal elementary law
 
 * Purpose
 
-This document is the master curriculum for MāyāPramāṇa's lesson
-sequence. It takes anyone who needs to understand, simulate, and
-eventually control a Bell-Bloom atomic magnetometer --- and provides
-the physics, signal processing, and control theory to do so.
+This document is the master curriculum for MāyāPramāṇa's lesson sequence. It takes a physics graduate student --- someone who has completed the standard undergraduate canon but has not yet specialised --- and builds them to the point where they can understand, simulate, and eventually control a Bell-Bloom atomic magnetometer.
 
-Everyone who comes to this material is a student of something.
-The first-year graduate student is a student of quantum mechanics.
-The experimental physicist is a student of Kalman filters. The
-control engineer is a student of Bloch equations. The AI agent is
-a student of what it means when hardware refuses to cooperate.
-The curriculum does not assume a single entry point or a single
-gap. It assumes collaborators with different partial expertise
-arriving with different priors.
+The curriculum fills the "physics-shaped hole" in Saikat's UQSC prototype: the prototype tells you /what/ to build; these lessons teach you /why/ each piece works.
 
-The curriculum fills the "physics-shaped hole" in Saikat's UQSC
-prototype: the prototype tells you /what/ to build; these lessons
-teach you /why/ each piece works.
+** Who This Is For
 
-See =collab/phantom-faculty-everyone-a-student.org= for the
-pedagogical philosophy: five modes of understanding (derivation,
-geometric intuition, encounter, compression, construction) available
-to any collaborator at any moment, mediated by an AI agent.
+A first-year physics graduate student at IIT-K (or equivalent).
 
-** The Baseline
-
-The lessons assume undergraduate physics (or equivalent knowledge
-from adjacent fields). The cadenza system handles the gaps --- what
-one collaborator can skip, another may need.
-
-*The undergraduate canon* (what a standard physics graduate has):
+*What they know* (the undergraduate canon):
 
 | Subject               | Textbook level    | What they have                               |
 |-----------------------+-------------------+----------------------------------------------|
@@ -63,19 +42,11 @@ one collaborator can skip, another may need.
 - Feedback control theory (PID, transfer functions, stability)
 - Functional programming (Haskell, C++ templates)
 
-** Pedagogical Principles: The Five Modes
+** Pedagogical Principles
 
-These are not teaching /styles/. They are five distinct claims about
-how understanding works. Each is available to any collaborator at any
-moment. The AI agent shifts between them as the situation demands.
+*** From Landau
 
-*** Derivation (Landau)
-
-Landau's /Course of Theoretical Physics/ embodies a principle we
-adopt: /every result is derived, not stated/. No equation falls from
-the sky. Each derivation starts from something already established
---- an axiom, a previous result, or a physical argument. The
-collaborator never has to accept a claim on authority alone.
+Landau's /Course of Theoretical Physics/ embodies a principle we adopt: /every result is derived, not stated/. No equation falls from the sky. Each derivation starts from something already established --- an axiom, a previous result, or a physical argument. The student never has to accept a claim on authority alone.
 
 - *No result without derivation*
 - *Derivations start from established ground*
@@ -83,167 +54,21 @@ collaborator never has to accept a claim on authority alone.
 - *Dimensional analysis as sanity check at every stage*
 - *Order-of-magnitude estimates before exact solutions*
 
-*** Geometric Intuition (Thorne)
+*** From Kip Thorne
 
-Thorne's /Modern Classical Physics/ demonstrates that physical
-intuition can be taught --- through geometric reasoning, through
-cross-domain connections, through the habit of asking "what happens
-in the limit?" before computing.
+Thorne's /Modern Classical Physics/ demonstrates that physical intuition can be taught --- through geometric reasoning, through cross-domain connections, through the habit of asking "what happens in the limit?" before computing.
 
-- *Geometric/pictorial reasoning* whenever possible (Bloch sphere,
-  phase space, Bode plots, information geometry)
-- *Cross-domain connections made explicit*: the same Bloch equations
-  in NMR, MRI, and atomic clocks; the same Kalman filter in
-  magnetometry and navigation
-- *Physical intuition questions embedded*: "What happens if
-  $T_2 \to 0$? What does that mean for the atoms?"
-- *Information-theoretic thread*: Fisher information connects noise
-  (Lesson 05) → estimation (Lesson 07) → control (Lesson 08)
+- *Geometric/pictorial reasoning* whenever possible (Bloch sphere, phase space, Bode plots, information geometry)
+- *Cross-domain connections made explicit*: the same Bloch equations in NMR, MRI, and atomic clocks; the same Kalman filter in magnetometry and navigation
+- *Physical intuition questions embedded*: "What happens if $T_2 \to 0$? What does that mean for the atoms?"
+- *Information-theoretic thread*: Fisher information connects noise (Lesson 05) → estimation (Lesson 07) → control (Lesson 08)
 
-For the collaborator crossing from one domain to another, Thorne's
-cross-domain map /is/ the teaching: "this is the same transfer
-function you know from..."
+*** From the MāyāPramāṇa Manifesto
 
-*** Encounter (Feynman)
-
-Feynman re-derived in front of you, including the wrong turns. The
-listener watches understanding happen, not understanding reported.
-
-- *Start with the phenomenon*: each lesson opens with something the
-  collaborator can /watch/ --- a precessing spin, a locking signal,
-  a noise spectrum --- and the question "why does it do that?"
-- *Multiple representations*: the same physics in Python
-  (exploratory), Haskell (algebraic), C++ (performant). What
-  survives all representations is what you actually understand.
-- *Permission to be a beginner*: in a post-hierarchical setting,
-  Feynman's deepest contribution is the senior physicist saying
-  "wait, I don't understand this yet --- can we go back to basics?"
-  without shame.
-
-*** Compression (Susskind)
-
-Susskind's /Theoretical Minimum/ is not simplification but
-/compression/: finding the shortest path through the mathematics
-that still reaches the physics honestly.
-
-- *The minimum, and nothing more*: each lecture introduces exactly
-  the mathematical structure needed. Every tool earns its place by
-  being /used/ in the same lesson that introduces it.
-- *Classical before quantum, deliberately*: the Poisson bracket
-  $\{L_i, L_j\} = \epsilon_{ijk} L_k$ is the classical shadow of
-  $[J_i, J_j] = i\hbar\epsilon_{ijk}J_k$. The bridge is /felt/
-  because both sides are developed.
-- *The honest description*: the density matrix is not advanced ---
-  it is the honest description of a quantum system that interacts
-  with anything. Mixed states are the default.
-- *Exercises as the learning*: the exercise forces the collaborator
-  to /use/ the framework, and in using it, to own it.
-- *Conversational rigour*: the tone of a colleague who happens to
-  know the terrain better --- not a lecturer performing authority.
-
-For the collaborator crossing domains, compression takes on a
-second role: finding the shortest honest bridge between what you
-know and what you need to know.
-
-*** Construction (The Manifesto)
-
-/What I cannot create, I do not understand./ --- Feynman's last
-blackboard.
-
-- *Running code as proof*: every lesson produces implementations in
-  three languages that must agree with each other and with the
-  analytical results.
-- *Three languages, one physics*: Python (intuition), Haskell
-  (specification), C++ (deployment). All must agree.
-- *Tests are specifications*: "Bloch norm conserved under pure
-  precession", not "test_bloch_3".
-- *Pramāṇa framework*: pratyakṣa (the raw signal), anumāna (the
-  inference from it), upamāna (one sensor teaches us about another).
-
-** How the Lessons Use These Principles
-
-The five modes --- Derivation, Geometric Intuition, Encounter,
-Compression, and Construction --- are not interchangeable. Each
-contributes something the others do not. The art is knowing when
-to invoke which mode. Below we show where each appears in the
-lesson sequence.
-
-*** Landau governs the derivations
-
-Every equation in the curriculum is /derived/, not stated. But Landau's voice is strongest in the core physics progression of each lesson --- the numbered sections where one result leads to the next through physical argument and algebra.
-
-| Lesson | The Landau moment |
-|--------+-------------------|
-| 00 | The Bloch equations follow from $d\mathbf{M}/dt$ with three physical terms, each named and justified |
-| 01 | Quantization of angular momentum /forced/ by the algebra of ladder operators --- not postulated |
-| 02 | Rabi oscillations derived from the time-dependent Schrödinger equation with one approximation (RWA), stated and bounded |
-| 04 | The dispersive lineshape derived from the complex susceptibility --- the error signal is not pulled from a hat |
-| 05 | The Cramér-Rao bound from the curvature of the log-likelihood --- not "here is a formula for the best you can do" |
-| 07 | The Kalman filter from Bayesian updating of Gaussians --- every step, no skipping to the algorithm |
-
-The Landau test: /can the collaborator, given the previous lesson, reproduce this derivation on a blank page?/ If not, the derivation has a gap.
-
-*** Thorne governs the intuition
-
-Thorne's voice appears wherever the lesson pauses to ask "what does this /mean/?" --- and wherever a picture or a limiting case illuminates more than another line of algebra.
-
-| Lesson | The Thorne moment |
-|--------+-------------------|
-| 00 | The Bloch sphere as the geometric arena for spin dynamics; $T_2 \to 0$ as the "lose all phase information" limit |
-| 01 | SU(2) vs SO(3) --- the double cover as a /geometric/ fact about rotations of spinors, not a group-theory technicality |
-| 02 | The avoided crossing (dressed states) as a /picture/ of atom-field coupling |
-| 04 | The dispersive signal crosses zero at resonance: sketch it, /see/ why it is an error signal |
-| 05 | The Allan deviation plot as a /portrait/ of noise character --- slope tells you the physics |
-| 08 | The Bode plot as a portrait of the feedback loop's character; gain margin and phase margin as geometric distances from instability |
-
-Cross-domain connections are Thorne's signature. We use them deliberately:
-
-- The /same/ Bloch equations in NMR (Lesson 04 cadenza), MRI, and atomic magnetometry
-- The /same/ Kalman filter in magnetometry (Lesson 07) and magnetic anomaly navigation (resources/magnetic-anomaly-navigation.org)
-- The /same/ PID structure in laser locking (Lesson 11) and Larmor tracking (Lesson 12)
-- Fisher information as the thread connecting noise (05) → estimation (07) → control (08)
-
-The Thorne test: /can the collaborator draw a picture that captures the essential physics, without writing an equation?/
-
-*** Susskind governs the scope
-
-Susskind's voice is the editor. It decides what belongs in the main lesson body and what belongs in a cadenza. The criterion is the Theoretical Minimum: /what is the shortest honest path from where the collaborator stands to the physics they need?/
-
-Our *cadenzas* are Susskind's interludes --- necessary mathematical or physical detours that some collaborators need and others can skip. The main lesson body must be self-contained without them.
-
-| Lesson | Main body (the minimum) | Cadenza (for those who need it) |
-|--------+-------------------------+---------------------------------|
-| 01 | Commutation relations → ladder operators → quantization → Pauli matrices → density matrix → Bloch derivation | =stern-gerlach= (the experiment), =su2-vs-so3= (the geometry), =density-matrix-motivation= (the why) |
-| 02 | Dipole approximation → Rabi frequency → RWA → optical Bloch equations | =dipole-matrix-elements= (the computation), =time-dependent-perturbation-review= (the connection to Fermi's golden rule) |
-| 03 | Hyperfine structure of Rb → selection rules → rate equations → dark states → $M_0$ | =clebsch-gordan-coefficients= (how to compute them), =rate-vs-master-equation= (when rate equations fail) |
-| 05 | Shot noise → quantum projection noise → Cramér-Rao bound → Allan deviation | Fluctuation-dissipation (for the stat-mech-inclined), SERF regime (advanced, not needed for Bell-Bloom) |
-
-Susskind's classical-before-quantum bridge is explicit in Lesson 01: the physics progression starts with /classical/ angular momentum as a generator of rotations (Poisson brackets, SO(3)), then crosses to quantum (commutators, SU(2)). The collaborator feels the bridge because both sides are developed, not because the classical side is handwaved as "review."
-
-The Susskind test: /if a section were removed, would the collaborator be unable to follow the next lesson?/ If yes, it stays in the main body. If no, it is a cadenza or an exercise.
-
-*** The Manifesto governs the method
-
-The Manifesto's voice is distinctive because it is /ours/ --- not inherited from a textbook tradition. It contributes three things the others do not:
-
-*Running code as proof of understanding.* Landau derives, Thorne draws, Susskind compresses --- but none of them require the collaborator to /build/. We do. Every lesson produces implementations in three languages, and those implementations must agree with each other and with the analytical results. The code is not illustration; it is verification.
-
-| Lesson | What the code proves |
-|--------+----------------------|
-| 00 | The Bloch equations conserve norm under pure precession (numerical verification of an analytical claim) |
-| 01 | The commutation relations close (algebraic verification); the density matrix from a Bloch vector is Hermitian, unit-trace, positive-semidefinite (constructive verification) |
-| 04 | The FFT of a simulated FID recovers the Larmor frequency (signal-processing verification of a physics prediction) |
-| 07 | The Kalman filter covariance converges to the Cramér-Rao bound (estimation theory verified against information theory) |
-| 09 | The complete pipeline extracts a 100 fT brain signal from 50 μT background (end-to-end verification) |
-
-*Tests as specifications.* A test name is a physics claim: "Bloch norm conserved under pure precession." If the test passes, the claim is verified. If it fails, either the code or the physics is wrong. This is a form of rigour that Landau would recognise --- but expressed in a medium he did not have.
-
-*The pramāṇa framework.* Each lesson's content maps onto an epistemological mode:
-- /Pratyakṣa/ (direct perception): the raw signal, the plot, the simulation output
-- /Anumāna/ (inference): the estimation, the model, the derivation
-- /Upamāna/ (analogy): the cross-domain connection --- the same Bloch equations in NMR and atomic magnetometry, the same Kalman filter in navigation and sensing
-
-This is not decoration. It is a claim about /how understanding works/: we perceive, we infer, we recognise patterns across domains. The curriculum follows this cycle in each lesson and across the whole sequence.
+- *Feynman Imperative*: what I cannot create, I do not understand. Every lesson produces running code.
+- *Three languages, one physics*: Python (intuition), Haskell (specification), C++ (deployment). All must agree.
+- *Tests are specifications*: "Bloch norm conserved under pure precession", not "test_bloch_3".
+- *Pramāṇa framework*: pratyakṣa (the raw signal), anumāna (the inference from it), upamāna (one sensor teaches us about another).
 
 ** The Logic of the Instrument
 
@@ -256,8 +81,7 @@ Lesson 03      Lesson 00      Lesson 02      Lesson 06      Lesson 07    Lesson 
                Lesson 04
 #+end_example
 
-But we teach it in a different order --- the /logical/ order, where
-each lesson depends only on what came before:
+But we teach it in a different order --- the /logical/ order, where each lesson depends only on what came before:
 
 #+begin_example
 00: Bloch Equations (the dynamical foundation)

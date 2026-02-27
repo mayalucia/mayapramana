@@ -1,0 +1,106 @@
+#+title: Cadenza — Bloch Sphere Geometry (Thorne Mode)
+#+subtitle: Seeing the quantum state before computing it
+#+LOOM: cadenza-expansion
+#+CADENZA-OF: bloch-sphere-geometry
+#+MODE: thorne
+
+* The Picture
+
+Before any algebra: what does a quantum spin-½ state /look like/?
+
+** The sphere
+
+Imagine a unit sphere in $\mathbb{R}^3$. The $z$-axis points up.
+
+- The /north pole/ $(0, 0, 1)$ is spin-up: the state $|{\uparrow}\rangle$.
+  If you measured $S_z$, you would always get $+\hbar/2$.
+
+- The /south pole/ $(0, 0, -1)$ is spin-down: $|{\downarrow}\rangle$.
+  Measurement of $S_z$ always gives $-\hbar/2$.
+
+- The /equator/ is the set of states where $M_z = 0$. Measurement of
+  $S_z$ gives $+\hbar/2$ or $-\hbar/2$ with equal probability. But
+  the /phase/ between the two possibilities varies around the equator.
+  The state pointing along $+x$ is
+  $\frac{1}{\sqrt{2}}(|{\uparrow}\rangle + |{\downarrow}\rangle)$.
+  The state pointing along $+y$ is
+  $\frac{1}{\sqrt{2}}(|{\uparrow}\rangle + i|{\downarrow}\rangle)$.
+  The equatorial angle /is/ the relative phase.
+
+This is the Bloch sphere. Every point on its surface is a pure quantum
+state. Every point inside is a mixed state — a statistical mixture, or
+equivalently, a spin entangled with something else.
+
+** The crucial picture: precession
+
+Now turn on a magnetic field along $z$. The Bloch vector $\mathbf{M}$
+precesses: it rotates about the $z$-axis at the Larmor frequency
+$\omega_L = \gamma B_z$.
+
+Picture this: a point on the surface of the sphere, tracing out a
+circle of constant latitude. The polar angle $\theta$ (the tilt from
+the $z$-axis) stays fixed — this means $M_z$ is constant. The
+azimuthal angle $\phi$ increases uniformly: $\phi(t) = \phi_0 + \omega_L t$.
+
+The transverse components oscillate: $M_x = \sin\theta\cos(\omega_L t)$,
+$M_y = \sin\theta\sin(\omega_L t)$. This is the signal a
+magnetometer reads — an oscillating transverse magnetisation whose
+frequency encodes the field strength.
+
+In the limit $\theta \to 0$ (spin nearly aligned with the field), the
+circle shrinks to a point — no oscillation, no signal. In the limit
+$\theta = \pi/2$ (spin in the equatorial plane), the circle is a
+great circle — maximum signal amplitude.
+
+** Relaxation as shrinking
+
+Now add relaxation. $T_2$ decay damps the transverse components —
+geometrically, the point spirals inward toward the $z$-axis. $T_1$
+decay drives $M_z$ toward $M_0$ — geometrically, the point drifts
+toward a target latitude.
+
+The combined picture: a spiral that simultaneously wraps around the
+$z$-axis (precession), tightens toward it ($T_2$), and drifts toward
+a target height ($T_1$). The endpoint — after many $T_1$ times — is
+the point $(0, 0, M_0)$ on the $z$-axis.
+
+If $M_0 = 0$ (no pumping), the spiral terminates at the centre of the
+sphere: the maximally mixed state. The spin has lost all information
+about its initial state to the environment.
+
+** Cross-domain map
+
+This same sphere appears in:
+
+- /NMR/: the nuclear spin in a static $B_0$ field, tipped by an rf
+  pulse, precessing and relaxing. The free induction decay is the
+  transverse projection of this spiral.
+
+- /Quantum computing/: a qubit on the Bloch sphere, rotated by gates.
+  The $\pi/2$ pulse in NMR is the Hadamard gate in a rotated frame.
+
+- /Classical optics/: the Poincar\eacute{} sphere for polarisation states.
+  The Stokes parameters $(S_1, S_2, S_3)$ are the Bloch vector for
+  photon polarisation.
+
+The structure is identical. The physics differs. Recognising the
+sphere in a new domain transfers all the geometric intuition you have
+already built.
+
+** Where the picture breaks
+
+The Bloch sphere is /exact/ for spin-½ (two-level) systems. For
+higher spins ($F > 1/2$), the state space is higher-dimensional and
+cannot be faithfully represented as a sphere. The density matrix for
+spin-$F$ has $(2F+1)^2 - 1$ real parameters — for $F = 2$ (the $^{87}$Rb
+ground state), that is 24 parameters, not 3.
+
+The Bloch equations in this lesson work because we treat the ensemble
+of $F = 2$ atoms as an effective two-level system. This approximation
+holds when the Zeeman splitting is linear and the pumping addresses
+only two levels. When it breaks — at high fields, or with quadratic
+Zeeman shifts — the Bloch sphere picture fails and we need the full
+density matrix (Lesson 02).
+
+The Landau expansion derives exactly where the approximation holds.
+Here, the picture tells you what to expect before the derivation confirms it.

@@ -22,38 +22,28 @@ them on a computer, and build instruments that exploit them to measure
 magnetic fields with extraordinary precision. Understanding may be
 elusive, but the mathematics is not.
 
-This lesson develops the Bloch equations — the dynamical equations for
-a spin-½ system in an external magnetic field — from first principles.
-We implement them in three languages: Python (for interactive
-exploration), Haskell (as executable specification), and C++ (for
-deployment). The physics is identical in all three. The expressions
-differ; the content does not.
+This lesson develops the Bloch equations — the dynamical equations for a spin-½ system in an external magnetic field — from first principles. We implement them in three languages: Python (for interactive exploration), Haskell (as executable specification), and C++ (for deployment). The physics is identical in all three. The expressions differ; the content does not.
 
 * The Physics
 
 ** A Spin in a Field
 
-A spin-½ particle in a magnetic field $\mathbf{B}$ has two energy
-levels separated by the Larmor frequency:
+A spin-½ particle in a magnetic field $\mathbf{B}$ has two energy levels separated by the Larmor frequency:
 
 $$\omega_L = \gamma |\mathbf{B}|$$
 
-where $\gamma$ is the gyromagnetic ratio. For $^{87}$Rb (the
-workhorse of atomic magnetometry), $\gamma / 2\pi \approx 7$ GHz/T
-for the electron spin, but the effective gyromagnetic ratio for the
-ground state hyperfine levels is:
+where $\gamma$ is the gyromagnetic ratio. For $^{87}Rb$(the workhorse of atomic magnetometry), $\gamma / 2\pi \approx 7$ GHz/T for the electron spin, but the effective gyromagnetic ratio for the ground state hyperfine levels is:
 
 $$\gamma_F = g_F \mu_B / \hbar$$
 
 where $g_F \approx 1/2$ for the $F=2$ ground state.
 
-The spin precesses about the magnetic field axis at the Larmor
-frequency. This precession is the clock that an atomic magnetometer
-reads.
+The spin precesses about the magnetic field axis at the Larmor frequency. This precession is the clock that an atomic magnetometer reads.
 
 #+BEGIN_CADENZA
 :concept       spin-half-qm
-:level         first-year-grad
+:knows         classical-mechanics angular-momentum torque
+:needs         quantum-spin intrinsic-angular-momentum stern-gerlach
 :prereqs       classical-mechanics angular-momentum
 :assumes       larmor-frequency gyromagnetic-ratio
 :anti-targets  quantum-field-theory relativistic-spin
@@ -70,24 +60,18 @@ but has not seen Dirac notation or Hilbert spaces.
 
 ** The Bloch Vector
 
-Rather than working with the full density matrix $\rho$ (a $2 \times 2$
-complex Hermitian matrix with unit trace), we parametrise the spin
-state by the Bloch vector $\mathbf{M} = (M_x, M_y, M_z)$:
+Rather than working with the full density matrix $\rho$ (a $2 \times 2$ complex Hermitian matrix with unit trace), we parametrise the spin state by the Bloch vector $\mathbf{M} = (M_x, M_y, M_z)$:
 
 $$\rho = \frac{1}{2}(\mathbf{I} + \mathbf{M} \cdot \boldsymbol{\sigma})$$
 
-where $\boldsymbol{\sigma} = (\sigma_x, \sigma_y, \sigma_z)$ are the
-Pauli matrices. The Bloch vector lives on or inside the unit sphere:
-$|\mathbf{M}| \leq 1$, with equality for pure states.
+where $\boldsymbol{\sigma} = (\sigma_x, \sigma_y, \sigma_z)$ are the Pauli matrices. The Bloch vector lives on or inside the unit sphere: $|\mathbf{M}| \leq 1$, with equality for pure states.
 
-This is the first key insight: a quantum state (complex, abstract,
-living in Hilbert space) maps to a classical vector (real, geometric,
-living in $\mathbb{R}^3$). The Bloch sphere is where quantum meets
-classical, where the physicist's spatial intuition applies.
+This is the first key insight: a quantum state (complex, abstract, living in Hilbert space) maps to a classical vector (real, geometric, living in $\mathbb{R}^3$). The Bloch sphere is where quantum meets classical, where the physicist's spatial intuition applies.
 
 #+BEGIN_CADENZA
 :concept       bloch-sphere-geometry
-:level         first-year-grad
+:knows         linear-algebra complex-numbers spin-half-qm
+:needs         bloch-sphere-representation state-visualisation
 :prereqs       linear-algebra complex-numbers
 :assumes       spin-half-qm pauli-matrices
 :anti-targets  higher-spin-systems qubit-gates
@@ -104,12 +88,13 @@ matrix algebra and complex numbers but has not seen density
 matrices or quantum decoherence.
 #+END_CADENZA
 
+
 ** The Equations of Motion
 
 The Bloch equations describe how $\mathbf{M}$ evolves:
 
-$$\frac{d\mathbf{M}}{dt} = \gamma \mathbf{M} \times \mathbf{B}
-  - \begin{pmatrix} M_x / T_2 \\ M_y / T_2 \\ (M_z - M_0) / T_1 \end{pmatrix}$$
+$$\frac{d\mathbf{M}}{dt} = \gamma \mathbf{M} \times \mathbf{B} - \begin{pmatrix} M_x / T_2 \\ M_y / T_2 \\ (M_z - M_0) / T_1 \end{pmatrix}$$
+    
 
 Three terms, three physics:
 
@@ -147,7 +132,8 @@ these equations, running in software.
 
 #+BEGIN_CADENZA
 :concept       atomic-magnetometry
-:level         first-year-grad
+:knows         electromagnetic-waves optics bloch-equations
+:needs         atomic-sensors bell-bloom-principle magnetometer-signal-chain
 :prereqs       electromagnetic-waves optics
 :assumes       bloch-equations larmor-frequency T1-T2-relaxation
 :anti-targets  SQUID-engineering cryogenics
@@ -322,7 +308,8 @@ print("RK4 integrator defined.")
 
 #+BEGIN_CADENZA
 :concept       numerical-ode-methods
-:level         first-year-grad
+:knows         calculus taylor-series differential-equations
+:needs         runge-kutta time-stepping numerical-stability
 :prereqs       calculus taylor-series
 :assumes       bloch-derivative pure-functions
 :anti-targets  symplectic-integrators spectral-methods

@@ -1,0 +1,101 @@
+#+title: Cadenza — Bloch Sphere Geometry (Feynman Mode)
+#+subtitle: Why does a quantum state live on a sphere?
+#+LOOM: cadenza-expansion
+#+CADENZA-OF: bloch-sphere-geometry
+#+MODE: feynman
+
+* The Encounter
+
+Here is something that should bother you.
+
+A quantum spin-½ state $|\psi\rangle = \alpha|{\uparrow}\rangle + \beta|{\downarrow}\rangle$ is described by two complex numbers, $\alpha$ and $\beta$. That is four real parameters. And yet the lesson just told us the Bloch vector $\mathbf{M} = (M_x, M_y, M_z)$ has three components and lives on a sphere. Where did the fourth parameter go? And why a /sphere/?
+
+Let me try to figure this out.
+
+** First attempt: just count
+
+Two complex numbers: $\alpha = a + ib$, $\beta = c + id$. Four real numbers. But normalisation says $|\alpha|^2 + |\beta|^2 = 1$, so that's one constraint. Three parameters left. Alright, three — that matches $\mathbb{R}^3$.
+
+But wait. There's a subtlety I almost missed. An overall phase $|\psi\rangle \to e^{i\phi}|\psi\rangle$ doesn't change any physical observable — all expectation values $\langle\psi|A|\psi\rangle$ are unchanged. So we should quotient by the overall phase. That removes another parameter: 4 - 1 (normalisation) - 1 (global phase) = 2.
+
+Two? Not three? That means the Bloch vector on the /surface/ of the
+sphere has two degrees of freedom (the polar and azimuthal angles
+$\theta$, $\phi$), and that is the space of pure states. The third
+parameter — the radius $|\mathbf{M}|$ — appears only when we allow
+mixed states (the density matrix). So the density matrix has 3
+parameters, but a pure state has only 2.
+
+That's satisfying. The sphere surface (2 parameters) = pure states. The sphere interior (3 parameters) = mixed states. The radius measures how mixed you are.
+
+** Second attempt: build the map explicitly
+
+Let me actually construct the Bloch vector from $|\psi\rangle$ and
+see if it lands on the sphere.
+
+Write $|\psi\rangle = \cos(\theta/2)|{\uparrow}\rangle + e^{i\phi}\sin(\theta/2)|{\downarrow}\rangle$
+— this is the most general state after fixing normalisation and
+removing global phase.
+
+Now compute $M_i = \langle\psi|\sigma_i|\psi\rangle$:
+
+$M_x = \langle\psi|\sigma_x|\psi\rangle$. Since $\sigma_x$ flips
+the spin, this gives $2\mathrm{Re}(\alpha^*\beta) = \sin\theta\cos\phi$.
+
+$M_y = \langle\psi|\sigma_y|\psi\rangle = 2\mathrm{Im}(\alpha^*\beta) = \sin\theta\sin\phi$.
+
+$M_z = \langle\psi|\sigma_z|\psi\rangle = |\alpha|^2 - |\beta|^2 = \cos\theta$.
+
+So $\mathbf{M} = (\sin\theta\cos\phi, \sin\theta\sin\phi, \cos\theta)$.
+That is literally the parametrisation of a unit sphere in spherical
+coordinates!
+
+Here is what is remarkable. The angles $\theta$ and $\phi$ that
+parametrise a quantum spin state are /exactly/ the spherical
+coordinates of a point on a classical sphere. The quantum state /is/ a
+direction in space. Not metaphorically — mathematically. The abstract
+Hilbert space vector maps to a concrete direction you could point
+your finger in.
+
+** The thing that is not obvious
+
+But here is the catch that tripped me up. The angle in the quantum
+state is $\theta/2$, not $\theta$. If the Bloch vector points along
+$+z$ ($\theta = 0$), the state is $|{\uparrow}\rangle$. If the Bloch
+vector points along $-z$ ($\theta = \pi$), the state is
+$|{\downarrow}\rangle$. To go from north pole to south pole, the
+Bloch vector rotates by $\pi$ but the spinor rotates by $\pi/2$.
+
+This is why a $2\pi$ rotation of the Bloch vector (which feels like
+it should return you to the start) actually gives
+$|\psi\rangle \to -|\psi\rangle$. You need a $4\pi$ rotation to get
+back. The Bloch sphere is really SU(2), not SO(3) — a double cover.
+For our purposes in the Bloch equations (which are equations for
+$\mathbf{M}$, not for $|\psi\rangle$), this subtlety doesn't
+matter. But it is there, and it is the reason spin-½ particles are
+genuinely quantum: no classical object has this property.
+
+** Now the mixed states
+
+When the spin interacts with its environment — collisions with other
+atoms, stray photons, collisions with the cell wall — the state
+becomes entangled with the environment. If we only look at the spin
+(tracing out the environment), the pure state on the surface
+gets replaced by a mixed state /inside/ the sphere.
+
+What does "inside" mean, physically? Not ignorance — not "we don't
+know which pure state it is." It means the spin and the environment
+are correlated, and no description of the spin alone can capture the
+full state. The radius $|\mathbf{M}|$ is a measure of this entanglement.
+
+$|\mathbf{M}| = 1$: the spin is in a definite quantum state. Pure.
+$|\mathbf{M}| = 0$: the spin is maximally entangled with the environment. No information remains in the spin alone.
+
+The $T_2$ decay in the Bloch equations is literally this: the
+transverse components shrink, the Bloch vector moves inward, the spin
+loses its phase information to the environment. Decoherence is a
+geometric shrinking.
+
+I find that extraordinary. A fundamentally quantum phenomenon —
+entanglement with the environment — is visible as a simple geometric
+fact: the point moves toward the centre of the sphere. The abstraction
+of the Bloch sphere makes quantum decoherence /intuitive/.

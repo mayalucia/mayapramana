@@ -4,20 +4,15 @@
 #+date: February 2026
 
 #+begin_quote
-Every sentence I utter must be understood not as an affirmation,
-but as a question.
+Every sentence I utter must be understood not as an affirmation, but as a question.
 --- Niels Bohr
 #+end_quote
 
-This document defines how MāyāPramāṇa is organised, written, built,
-and versioned. It inherits conventions from MayaPortal and MayaDevGenI,
-adapted for a multilingual (Python, Haskell, C++) scientific project
-aimed at both human and machine intelligences.
+This document defines how MāyāPramāṇa is organised, written, built, and versioned. It inherits conventions from MayaPortal and MayaDevGenI, adapted for a multilingual (Python, Haskell, C++) scientific project aimed at both human and machine intelligences.
 
 * The Cardinal Rule
 
-The =.org= files are the source of truth. Generated source files
-(=.hs=, =.hpp=, =.py=) are artifacts extracted via =org-babel-tangle=.
+The =.org= files are the source of truth. Generated source files (=.hs=, =.hpp=, =.py=) are artifacts extracted via =org-babel-tangle=.
 
 #+begin_example
 lessons/NN-topic/concept.org    ← EDIT HERE
@@ -27,9 +22,7 @@ cpp/src/core/bloch.hpp          ← GENERATED
 python/mayapramana/bloch.py     ← GENERATED (if tangled)
 #+end_example
 
-Never edit generated source files directly. Changes will be
-overwritten on next tangle, and the lesson narrative will
-desynchronise from the code.
+Never edit generated source files directly. Changes will be overwritten on next tangle, and the lesson narrative will desynchronise from the code.
 
 *Tangle invocation*:
 #+begin_src shell :eval no
@@ -125,19 +118,18 @@ mayapramana/
 
 Lessons use =NN-slug= format:
 
-| Lesson | Topic | Builds On |
-|--------+-------+-----------|
-| 00 | Bloch equations | — |
-| 01 | Optical pumping | 00 |
-| 02 | Magnetic resonance | 00, 01 |
-| 03 | Lock-in detection | 00 |
-| 04 | Kalman filtering | 00, 03 |
-| 05 | PID control | 04 |
-| 06 | Feedback loops | 03, 04, 05 |
-| ... | ... | ... |
+| Lesson | Topic              | Builds On  |
+|--------+--------------------+------------|
+|     00 | Bloch equations    | —          |
+|     01 | Optical pumping    | 00         |
+|     02 | Magnetic resonance | 00, 01     |
+|     03 | Lock-in detection  | 00         |
+|     04 | Kalman filtering   | 00, 03     |
+|     05 | PID control        | 04         |
+|     06 | Feedback loops     | 03, 04, 05 |
+|    ... | ...                | ...        |
 
-Each lesson is cumulative: it imports and extends prior lessons'
-types and functions.
+Each lesson is cumulative: it imports and extends prior lessons' types and functions.
 
 ** Lesson Structure
 
@@ -154,20 +146,16 @@ Every =concept.org= follows this pattern:
 [Opening quote — sets the philosophical tone]
 
 * The Physics
-  Mathematical development, equations, physical intuition.
-  LaTeX for equations, prose for meaning.
+  Mathematical development, equations, physical intuition. LaTeX for equations, prose for meaning.
 
 * Implementation: Python
-  Interactive exploration. Runs in-session via org-babel.
-  Plots, numerical experiments, building intuition.
+  Interactive exploration. Runs in-session via org-babel. Plots, numerical experiments, building intuition.
 
 * Implementation: Haskell
-  Executable specification. Tangles to source tree.
-  Types document the physics. Purity is guaranteed.
+  Executable specification. Tangles to source tree. Types document the physics. Purity is guaranteed.
 
 * Implementation: C++
-  Deployment code. Header-only where possible.
-  constexpr, concepts, dimensional analysis.
+  Deployment code. Header-only where possible. constexpr, concepts, dimensional analysis.
 
 * Verification
   Cross-language tests. All three must agree.
@@ -253,55 +241,52 @@ Each lesson ends with exercises that:
 
 Every non-trivial task produces two files:
 
-| File | Audience | Content | Authority |
-|------+----------+---------+-----------|
-| =plan.org= | Human (why) | Reasoning, philosophy, design | *Canonical* |
-| =spec.org= | Machine (what) | Paths, signatures, done-when | Derived |
+| File     | Audience       | Content                       | Authority |
+|----------+----------------+-------------------------------+-----------|
+| =plan.org= | Human (why)    | Reasoning, philosophy, design | *Canonical* |
+| =spec.org= | Machine (what) | Paths, signatures, done-when  | Derived   |
 
-If they disagree, =plan.org= is authoritative. The plan articulates
-intent; the spec is its mechanical realisation.
+If they disagree, =plan.org= is authoritative. The plan articulates intent; the spec is its mechanical realisation.
 
 ** Plan.org Structure
 
 #+begin_example
-* Why This Matters
+,* Why This Matters
   Context, problem, motivation
 
-* Design Philosophy
+,* Design Philosophy
   Architectural choices and their reasons
 
-* Implementation Strategy
+,* Implementation Strategy
   Approach and rationale
 
-* Alternatives Considered
+,* Alternatives Considered
   What we didn't choose and why
 #+end_example
 
 ** Spec.org Structure
 
 #+begin_example
-* Bootstrap
+,* Bootstrap
   | File | Purpose | Status |
   | ... | ... | [ ] |
 
-* Interface Contract
+,* Interface Contract
   ** Assumes (preconditions)
   ** Promises (postconditions)
 
-* Implementation Steps
+,* Implementation Steps
   1. [ ] Step with exact paths and signatures
   2. [ ] ...
 
-* Done-When
+,* Done-When
   - [ ] Testable criterion 1
   - [ ] Testable criterion 2
 #+end_example
 
 * Pure Core / Effectful Shell
 
-Inherited from MayaPortal. All physics, signal processing, and
-estimation lives in the pure core. Hardware interaction lives in the
-shell.
+Inherited from MayaPortal. All physics, signal processing, and estimation lives in the pure core. Hardware interaction lives in the shell.
 
 #+begin_example
 PURE CORE (mathematics)
@@ -317,19 +302,17 @@ EFFECTFUL SHELL (hardware)
 ├── Timing and real-time scheduling
 #+end_example
 
-The pure core is where the physics lives. The shell is as thin as
-possible. A different lab can swap their hardware interface without
-touching physics code.
+The pure core is where the physics lives. The shell is as thin as possible. A different lab can swap their hardware interface without touching physics code.
 
 * Errors as Values
 
 No exceptions. Use language-appropriate sum types:
 
-| Language | Type | Pattern |
-|----------+------+---------|
-| Haskell | =Either Error a= | Monadic bind for chaining |
-| C++ | =std::expected<T, Error>= | =.and_then()= for chaining |
-| Python | =Result= or return tuples | Convention (Python lacks native sum types) |
+| Language | Type                    | Pattern                                    |
+|----------+-------------------------+--------------------------------------------|
+| Haskell  | =Either Error a=          | Monadic bind for chaining                  |
+| C++      | =std::expected<T, Error>= | =.and_then()= for chaining                   |
+| Python   | =Result= or return tuples | Convention (Python lacks native sum types) |
 
 Every function that can fail says so in its type signature.
 
@@ -338,10 +321,8 @@ Every function that can fail says so in its type signature.
 ** Three Levels
 
 1. *Unit tests*: each pure function tested independently
-2. *Cross-language validation*: Python, Haskell, C++ must agree on
-   the same physics to within floating-point tolerance
-3. *Property-based tests* (Haskell QuickCheck): "for all valid
-   inputs, this invariant holds"
+2. *Cross-language validation*: Python, Haskell, C++ must agree on the same physics to within floating-point tolerance
+3. *Property-based tests* (Haskell QuickCheck): "for all valid inputs, this invariant holds"
 
 ** Cross-Language Validation Pattern
 
@@ -389,9 +370,7 @@ collab/
 
 ** Context.org
 
-Fast re-entry point for any AI agent (Claude, GPT, Gemini, or other).
-Contains: project topology, active sessions, paused sessions,
-completed sessions with links.
+Fast re-entry point for any AI agent (Claude, GPT, Gemini, or other). Contains: project topology, active sessions, paused sessions, completed sessions with links.
 
 ** Epistemic Hygiene
 
@@ -402,8 +381,7 @@ Inherited from MayaDevGenI:
 - *Plausibly*: makes sense but uncertain
 - *Speculatively*: interesting but ungrounded
 
-Never paper over uncertainty with fluent prose. If you don't know,
-say so.
+Never paper over uncertainty with fluent prose. If you don't know, say so.
 
 * Git Conventions
 
@@ -419,8 +397,7 @@ Co-Authored-By: Claude Opus 4.6 <noreply@anthropic.com>
 
 Types: =feat=, =fix=, =docs=, =refactor=, =test=, =chore=
 
-Scope: =physics=, =signal=, =estimation=, =control=, =lesson=,
-=haskell=, =cpp=, =python=
+Scope: =physics=, =signal=, =estimation=, =control=, =lesson=, =haskell=, =cpp=, =python=
 
 ** Tagging
 
@@ -469,9 +446,7 @@ Never fabricate citations. If uncertain, say so.
 
 * MāyāLoom Conventions
 
-MāyāPramāṇa lessons follow the [[https://github.com/mayalucia/mayalucia][MāyāLoom]] convention — org files
-structured for both human and machine readers. The full manifesto is
-in the parent project at =project/mayaloom.org=.
+MāyāPramāṇa lessons follow the [[https://github.com/mayalucia/mayalucia][MāyāLoom]] convention — org files structured for both human and machine readers. The full manifesto is in the parent project at =project/mayaloom.org=.
 
 ** Loom Manifest
 
@@ -500,7 +475,8 @@ Expansion points where an agent generates a contextual tutorial:
 #+begin_example
 ,#+BEGIN_CADENZA
 :concept      spin-half-qm
-:level        first-year-grad
+:knows        classical-mechanics angular-momentum
+:needs        quantum-spin-states bloch-sphere
 :prereqs      classical-mechanics angular-momentum
 :assumes      larmor-frequency gyromagnetic-ratio
 :anti-targets quantum-field-theory relativistic-effects
@@ -513,7 +489,8 @@ starting point, connecting to what notation in this lesson.]
 | Field | Required | Meaning |
 |-------+----------+---------|
 | =:concept= | yes | Slug identifying this cadenza |
-| =:level= | yes | Target: =undergrad=, =first-year-grad=, =researcher= |
+| =:knows= | yes | Domains/concepts the reader already commands |
+| =:needs= | yes | Domains/concepts this cadenza bridges toward |
 | =:prereqs= | yes | What the reader should know but may need reminding of |
 | =:assumes= | no | What this lesson already taught — do not repeat |
 | =:anti-targets= | no | Topics to explicitly not cover |
@@ -522,10 +499,10 @@ starting point, connecting to what notation in this lesson.]
 ** Agent Protocol for Cadenza Expansion
 
 1. Read the =#+LOOM= manifest to orient
-2. Find the cadenza matching the student's question
-3. Read =:level= and =:prereqs= to calibrate pitch
+2. Find the cadenza matching the collaborator's question
+3. Read =:knows= and =:needs= to identify the domain gap; read =:prereqs= to calibrate pitch
 4. Read surrounding lesson context (at minimum the enclosing section)
-5. Generate a tutorial that extends — not repeats — the lesson
+5. Generate a tutorial that bridges the gap — extending, not repeating, the lesson
 6. Use the same notation, variable names, and physical system
 
 * For AI Agents

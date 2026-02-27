@@ -1,0 +1,116 @@
+#+title: Cadenza — Bloch Sphere Geometry (Landau Mode)
+#+subtitle: Why a 2x2 density matrix lives in R³
+#+LOOM: cadenza-expansion
+#+CADENZA-OF: bloch-sphere-geometry
+#+MODE: landau
+
+* The Derivation
+
+We establish that the Bloch sphere parametrisation is not a choice but
+a consequence of the algebraic structure of 2×2 Hermitian matrices.
+
+** The space of states
+
+A density matrix $\rho$ for a spin-½ system is a 2×2 matrix
+satisfying three constraints:
+
+1. Hermitian: $\rho = \rho^\dagger$
+2. Unit trace: $\mathrm{Tr}(\rho) = 1$
+3. Positive semi-definite: $\rho \geq 0$
+
+A general 2×2 complex matrix has 8 real parameters (2 per entry). The
+Hermiticity constraint $\rho_{ij} = \rho_{ji}^*$ forces the diagonal
+to be real and the off-diagonal elements to be conjugate pairs,
+leaving 4 real parameters: $\rho_{11}$, $\rho_{22}$, $\mathrm{Re}(\rho_{12})$,
+$\mathrm{Im}(\rho_{12})$. The unit trace constraint $\rho_{11} + \rho_{22} = 1$
+removes one more, leaving 3.
+
+Three real parameters. A point in $\mathbb{R}^3$.
+
+** The Pauli basis
+
+Any traceless Hermitian 2×2 matrix can be expanded in the Pauli
+matrices $\sigma_x$, $\sigma_y$, $\sigma_z$:
+
+$$\sigma_x = \begin{pmatrix} 0 & 1 \\ 1 & 0 \end{pmatrix}, \quad
+  \sigma_y = \begin{pmatrix} 0 & -i \\ i & 0 \end{pmatrix}, \quad
+  \sigma_z = \begin{pmatrix} 1 & 0 \\ 0 & -1 \end{pmatrix}$$
+
+This is a basis: any traceless Hermitian 2×2 matrix $A$ can be
+uniquely written as $A = a_x \sigma_x + a_y \sigma_y + a_z \sigma_z$
+with $a_x, a_y, a_z \in \mathbb{R}$. To verify completeness, note
+that the space of traceless Hermitian 2×2 matrices is 3-dimensional
+(same counting as above minus the trace), and the three Pauli matrices
+are linearly independent (their traces against each other give the
+orthogonality relation $\mathrm{Tr}(\sigma_i \sigma_j) = 2\delta_{ij}$).
+
+Since $\rho$ is Hermitian with unit trace, we can write:
+
+$$\rho = \frac{1}{2}(\mathbf{I} + \mathbf{M} \cdot \boldsymbol{\sigma})
+       = \frac{1}{2}\begin{pmatrix} 1 + M_z & M_x - iM_y \\ M_x + iM_y & 1 - M_z \end{pmatrix}$$
+
+where $\mathbf{M} = (M_x, M_y, M_z)$ is the Bloch vector. The factor
+$\frac{1}{2}\mathbf{I}$ accounts for the trace; the Bloch vector
+captures the traceless part.
+
+** Extracting $\mathbf{M}$ from $\rho$
+
+Using the orthogonality relation $\mathrm{Tr}(\sigma_i \sigma_j) = 2\delta_{ij}$:
+
+$$M_i = \mathrm{Tr}(\rho \, \sigma_i)$$
+
+This is not a definition — it is a consequence of the basis expansion.
+The components of $\mathbf{M}$ are expectation values of the Pauli
+operators: $M_x = \langle \sigma_x \rangle$, $M_y = \langle \sigma_y \rangle$,
+$M_z = \langle \sigma_z \rangle$.
+
+** The constraint: $|\mathbf{M}| \leq 1$
+
+The positive semi-definiteness of $\rho$ requires non-negative
+eigenvalues. The eigenvalues of $\rho$ are:
+
+$$\lambda_\pm = \frac{1}{2}(1 \pm |\mathbf{M}|)$$
+
+(This follows from $\rho = \frac{1}{2}(\mathbf{I} + \mathbf{M} \cdot \boldsymbol{\sigma})$
+and the fact that $\mathbf{M} \cdot \boldsymbol{\sigma}$ has
+eigenvalues $\pm |\mathbf{M}|$, which is a standard result for Pauli
+matrices: $(\mathbf{M} \cdot \boldsymbol{\sigma})^2 = |\mathbf{M}|^2 \mathbf{I}$.)
+
+For $\lambda_- \geq 0$, we need $|\mathbf{M}| \leq 1$.
+
+** Pure and mixed states
+
+- $|\mathbf{M}| = 1$: one eigenvalue is 0, the other is 1. The
+  density matrix is a rank-1 projector $\rho = |\psi\rangle\langle\psi|$.
+  This is a /pure state/ — on the surface of the sphere.
+
+- $|\mathbf{M}| < 1$: both eigenvalues are positive. This is a
+  /mixed state/ — inside the sphere. The purity $\mathrm{Tr}(\rho^2) = \frac{1}{2}(1 + |\mathbf{M}|^2)$
+  decreases as $|\mathbf{M}|$ decreases.
+
+- $|\mathbf{M}| = 0$: $\rho = \frac{1}{2}\mathbf{I}$. The maximally
+  mixed state — complete ignorance, the centre of the sphere.
+
+The physical meaning of $|\mathbf{M}| < 1$ is not that we lack
+knowledge of the state. It is that the spin is /entangled with its
+environment/. The reduced density matrix of a subsystem in an
+entangled state is necessarily mixed. Decoherence — the loss of phase
+information to the environment — shrinks $|\mathbf{M}|$.
+
+** Connection to the Bloch equations
+
+The lesson defines $d\mathbf{M}/dt = \gamma \mathbf{M} \times \mathbf{B} - \text{relaxation}$.
+In this language:
+
+- /Precession/ ($\gamma \mathbf{M} \times \mathbf{B}$) rotates $\mathbf{M}$
+  on a sphere of constant $|\mathbf{M}|$. It preserves purity.
+
+- /Relaxation/ ($T_1$, $T_2$ terms) changes $|\mathbf{M}|$. Transverse
+  relaxation ($T_2$) shrinks the transverse components, moving the
+  state inward. Longitudinal relaxation ($T_1$) drives $M_z$ toward
+  equilibrium $M_0$.
+
+The Bloch equations are the equations of motion for a point on (or
+inside) this sphere. The derivation of these equations from the von
+Neumann equation $i\hbar \dot{\rho} = [H, \rho]$ plus a Lindblad
+dissipator is the subject of Lesson 02.

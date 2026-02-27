@@ -14,29 +14,13 @@ in its season./
 
 * The Observation
 
-In 2025, something happened that no curriculum anticipated. The
-tools changed faster than the experts. The physicist who spent
-twenty years mastering statistical mechanics discovered she needed
-to learn FPGA programming. The engineer who could build a
-magnetometer blind could not write the Kalman filter that would
-make it useful. The AI agent had read every paper on atomic
-magnetometry but had never felt a lock-in amplifier refuse to lock.
+In 2025, something happened that no curriculum anticipated. The tools changed faster than the experts. The physicist who spent twenty years mastering statistical mechanics discovered she needed to learn FPGA programming. The engineer who could build a magnetometer blind could not write the Kalman filter that would make it useful. The AI agent had read every paper on atomic magnetometry but had never felt a lock-in amplifier refuse to lock.
 
-Everyone became a student again. Not by choice, but by the
-structure of the problem.
+Everyone became a student again. Not by choice, but by the structure of the problem.
 
-This is not the usual story about lifelong learning or upskilling.
-Those are management words for a deeper shift. The shift is
-/epistemic/: when the tools change fast enough, no one holds
-settled expertise across the whole stack. Everyone is a beginner
-somewhere. The PhD physicist and the first-year graduate student
-arrive at the Bell-Bloom magnetometer with different priors but the
-same fundamental need --- to understand something they do not yet
-understand.
+This is not the usual story about lifelong learning or upskilling. Those are management words for a deeper shift. The shift is /epistemic/: when the tools change fast enough, no one holds settled expertise across the whole stack. Everyone is a beginner somewhere. The PhD physicist and the first-year graduate student arrive at the Bell-Bloom magnetometer with different priors but the same fundamental need --- to understand something they do not yet understand.
 
-The question is not /how do we teach students/. The question is
-*how do collaborators with different partial expertise develop
-shared understanding and individual voice simultaneously*.
+The question is not /how do we teach students/. The question is *how do collaborators with different partial expertise develop shared understanding and individual voice simultaneously*.
 
 * The Phantom Faculty
 
@@ -46,29 +30,21 @@ engagement/ that any collaborator can enter at any moment:
 
 - One never lets an equation appear without derivation.
 - One makes you /see/ the physics before you calculate it.
-- One performs the act of understanding in front of you, wrong turns
-  and all.
+- One performs the act of understanding in front of you, wrong turns and all.
 - One strips every lesson to the minimum honest path.
 - One insists you build it yourself, in code, and prove it works.
 
-These modes have names. Not because they belong to the people named,
-but because those people /perfected/ them and left behind enough
-evidence that we can decompose their methods:
+These modes have names. Not because they belong to the people named, but because those people /perfected/ them and left behind enough evidence that we can decompose their methods:
 
-| Mode | Perfected by | Epistemological claim |
-|------+--------------+----------------------|
-| Derivation | Landau | Understanding is logical reconstruction |
-| Geometric intuition | Thorne | Understanding is structural perception |
-| Encounter | Feynman | Understanding is generative re-discovery |
-| Compression | Susskind | Understanding is the minimum honest path |
-| Construction | /Us/ | Understanding is verified building |
+| Mode                | Perfected by | Epistemological claim                    |
+|---------------------+--------------+------------------------------------------|
+| Derivation          | Landau       | Understanding is logical reconstruction  |
+| Geometric intuition | Thorne       | Understanding is structural perception   |
+| Encounter           | Feynman      | Understanding is generative re-discovery |
+| Compression         | Susskind     | Understanding is the minimum honest path |
+| Construction        | /Us/           | Understanding is verified building       |
 
-In the old world, these were five professors in five offices. You
-visited one at a time, and the order was determined by the course
-catalogue. In the new world --- the world where everyone is a
-student --- they are five modes available to /any collaborator at
-any moment/, mediated by an AI agent that can shift between them as
-the situation demands.
+In the old world, these were five professors in five offices. You visited one at a time, and the order was determined by the course catalogue. In the new world --- the world where everyone is a student --- they are five modes available to /any collaborator at any moment/, mediated by an AI agent that can shift between them as the situation demands.
 
 The faculty is phantom because no one sits in the professor's chair.
 
@@ -76,18 +52,9 @@ The faculty is phantom because no one sits in the professor's chair.
 
 Three forces dissolved it:
 
-1. *Rate of change exceeds expertise accumulation.* Quantum sensor
-   engineering requires atomic physics, signal processing, control
-   theory, FPGA programming, statistical estimation, and materials
-   science. No human being is expert in all of these. Twenty years
-   ago, the professor knew the full stack. Today, no one does.
+1. *Rate of change exceeds expertise accumulation.* Quantum sensor engineering requires atomic physics, signal processing, control theory, FPGA programming, statistical estimation, and materials science. No human being is expert in all of these. Twenty years ago, the professor knew the full stack. Today, no one does.
 
-2. *The AI agent as common substrate.* When Landau's derivation
-   method is available to anyone through an AI agent, the senior
-   physicist does not need to perform authority. The graduate
-   student can invoke the Landau voice as readily as the professor.
-   The mode of understanding is democratised; the /content/ of what
-   you understand still requires work.
+2. *The AI agent as common substrate.* When Landau's derivation method is available to anyone through an AI agent, the senior physicist does not need to perform authority. The graduate student can invoke the Landau voice as readily as the professor. The mode of understanding is democratised; the /content/ of what you understand still requires work.
 
 3. *Cross-domain convergence.* The Bloch equations appear in NMR, in
    atomic magnetometry, in quantum computing. The Kalman filter

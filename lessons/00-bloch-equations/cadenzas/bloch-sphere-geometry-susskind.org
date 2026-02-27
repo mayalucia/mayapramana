@@ -1,0 +1,53 @@
+#+title: Cadenza — Bloch Sphere Geometry (Susskind Mode)
+#+subtitle: The minimum path from density matrix to sphere
+#+LOOM: cadenza-expansion
+#+CADENZA-OF: bloch-sphere-geometry
+#+MODE: susskind
+
+* The Compressed Path
+
+You need three facts to understand the Bloch sphere. Here they are.
+
+** Fact 1: Three real numbers
+
+A spin-½ density matrix $\rho$ is 2×2, Hermitian, unit trace,
+positive semi-definite. Hermiticity + unit trace leaves 3 free real
+parameters. Therefore the state space is a subset of $\mathbb{R}^3$.
+
+** Fact 2: The Pauli expansion
+
+The Pauli matrices $\boldsymbol{\sigma} = (\sigma_x, \sigma_y, \sigma_z)$
+are a basis for traceless Hermitian 2×2 matrices. Any such $\rho$
+decomposes as:
+
+$$\rho = \frac{1}{2}(\mathbf{I} + \mathbf{M} \cdot \boldsymbol{\sigma})$$
+
+with $\mathbf{M} = (M_x, M_y, M_z) = (\mathrm{Tr}(\rho\sigma_x),\, \mathrm{Tr}(\rho\sigma_y),\, \mathrm{Tr}(\rho\sigma_z))$.
+
+** Fact 3: The sphere constraint
+
+Positive semi-definiteness of $\rho$ requires $|\mathbf{M}| \leq 1$.
+
+- $|\mathbf{M}| = 1$: pure state (surface). The spin is in a
+  definite quantum state.
+- $|\mathbf{M}| < 1$: mixed state (interior). The spin is entangled
+  with its environment.
+- $|\mathbf{M}| = 0$: maximally mixed (centre). Complete decoherence.
+
+** What you need for the Bloch equations
+
+The Bloch equations $d\mathbf{M}/dt = \gamma\mathbf{M}\times\mathbf{B} - \text{relaxation}$
+are equations of motion for this vector.
+
+- Precession ($\gamma\mathbf{M}\times\mathbf{B}$) rotates $\mathbf{M}$
+  on a sphere of constant radius — preserves purity.
+- $T_2$ decay shrinks the transverse components — moves the state
+  inward.
+- $T_1$ decay drives $M_z$ toward equilibrium — moves the state
+  toward a target point on the $z$-axis.
+
+That is all you need to follow the rest of this lesson. The derivation
+from the von Neumann equation with Lindblad dissipation is in Lesson 02.
+For the full parameter-counting argument, see the Landau expansion.
+For a geometric picture of precession and relaxation as spirals on the
+sphere, see the Thorne expansion.

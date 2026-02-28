@@ -1,5 +1,7 @@
 resources/
 .agent-shell/
 .claude/
+.venv/
 __pycache__/
 *.pyc
+*.egg-info/
